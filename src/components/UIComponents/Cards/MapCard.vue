@@ -26,7 +26,10 @@
   import Vue from 'vue'
   import * as VueGoogleMaps from 'vue2-google-maps'
   import GrayScale from './GrayScale.json'
-  import WeatherMarkers from './WeatherMarkers'
+  import FontMarkers from './FontMarkers'
+  import WeatherMarkersDef from './weather-markers.json'
+  const WeatherMarkers = FontMarkers(WeatherMarkersDef);
+console.log(WeatherMarkers);
   Vue.use(VueGoogleMaps, {
     load: {
       key: API_KEY
@@ -60,7 +63,7 @@
       this.stations = [
         {
           position: {lat: 39.454340, lng: -0.316769},
-          icon: WeatherMarkers.Cloudy(),
+          icon: WeatherMarkers['wi-day-rain-mix']({scale: 1, fillOpacity: 1, fillColor: 'red', strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1}),
           text: '24ºC'
         }
       ]
