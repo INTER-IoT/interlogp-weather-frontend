@@ -5,11 +5,11 @@
         <div class="col-xl-3 col-md-6">
           <stats-card>
             <div slot="header" class="icon-warning">
-              <i class="nc-icon nc-chart text-warning"></i>
+              <i class="wi wi-thermometer text-danger"></i>
             </div>
             <div slot="content">
-              <p class="card-category">Capacity</p>
-              <h4 class="card-title">105GB</h4>
+              <p class="card-category">Avg Temperature</p>
+              <h4 class="card-title">40º C</h4>
             </div>
             <div slot="footer">
               <i class="fa fa-refresh"></i>Updated now
@@ -20,11 +20,11 @@
         <div class="col-xl-3 col-md-6">
           <stats-card>
             <div slot="header" class="icon-success">
-              <i class="nc-icon nc-light-3 text-success"></i>
+              <i class="wi wi-strong-wind text-success"></i>
             </div>
             <div slot="content">
-              <p class="card-category">Revenue</p>
-              <h4 class="card-title">$1,345</h4>
+              <p class="card-category">Avg Wind Speed</p>
+              <h4 class="card-title">4.3 m/s</h4>
             </div>
             <div slot="footer">
               <i class="fa fa-calendar-o"></i>Last day
@@ -35,11 +35,11 @@
         <div class="col-xl-3 col-md-6">
           <stats-card>
             <div slot="header" class="icon-danger">
-              <i class="nc-icon nc-vector text-danger"></i>
+              <i class="wi wi-humidity text-primary"></i>
             </div>
             <div slot="content">
-              <p class="card-category">Errors</p>
-              <h4 class="card-title">23</h4>
+              <p class="card-category">Avg Humidity</p>
+              <h4 class="card-title">70 %</h4>
             </div>
             <div slot="footer">
               <i class="fa fa-clock-o"></i>Last day
@@ -50,11 +50,11 @@
         <div class="col-xl-3 col-md-6">
           <stats-card>
             <div slot="header" class="icon-info">
-              <i class="nc-icon nc-favourite-28 text-primary"></i>
+              <i class="wi wi-thermometer-exterior text-primary"></i>
             </div>
             <div slot="content">
-              <p class="card-category">Followers</p>
-              <h4 class="card-title">+45</h4>
+              <p class="card-category">Avg Sea Temperature</p>
+              <h4 class="card-title">28º C</h4>
             </div>
             <div slot="footer">
               <i class="fa fa-refresh"></i>Updated now
@@ -65,45 +65,76 @@
       </div>
       <div class="row">
         <div class="col-md-8">
-          <chart-card :chart-data="lineChart.data"
+          <map-card :chart-data="lineChart.data"
                       :chart-options="lineChart.options"
                       :responsive-options="lineChart.responsiveOptions">
             <template slot="header">
-              <h4 class="card-title">Users Behavior</h4>
-              <p class="card-category">24 Hours performance</p>
+              <h4 class="card-title">Map Example</h4>
+              <p class="card-category">Real Time Weather Stations</p>
+            </template>
+            <template slot="footer">
+             <div class="stats">
+                <i class="fa fa-history"></i> Updated 3 minutes ago
+              </div>
+            </template>
+          </map-card>
+        </div>
+        <div class="col-md-4">
+          <chart-card :chart-data="pieChart.data" chart-type="Pie">
+            <template slot="header">
+              <h4 class="card-title">Weather station status</h4>
+              <p class="card-category">Real time performance</p>
             </template>
             <template slot="footer">
               <div class="legend">
-                <i class="fa fa-circle text-info"></i> Open
-                <i class="fa fa-circle text-danger"></i> Click
-                <i class="fa fa-circle text-warning"></i> Click Second Time
+                <i class="fa fa-circle text-info"></i> Updated last hour
+                <i class="fa fa-circle text-warning"></i> Updated last day
+                <i class="fa fa-circle text-danger"></i> No update in one day
               </div>
               <hr>
               <div class="stats">
-                <i class="fa fa-history"></i> Updated 3 minutes ago
+                <i class="fa fa-clock-o"></i> Measured 1h ago
               </div>
             </template>
           </chart-card>
         </div>
-
+      </div>
+      <div class="row">
         <div class="col-md-4">
-          <chart-card :chart-data="pieChart.data" chart-type="Pie">
+          <chart-card :chart-data="lineChart.data"
+                      :chart-options="lineChart.options"
+                      :responsive-options="lineChart.responsiveOptions">
             <template slot="header">
-              <h4 class="card-title">Email Statistics</h4>
-              <p class="card-category">Last Campaign Performance</p>
+              <h4 class="card-title">Week Temperature Progression</h4>
+              <p class="card-category">Displaying key weather stations</p>
             </template>
             <template slot="footer">
               <div class="legend">
-                <i class="fa fa-circle text-info"></i> Open
-                <i class="fa fa-circle text-danger"></i> Bounce
-                <i class="fa fa-circle text-warning"></i> Unsubscribe
+                <i class="fa fa-circle text-info"></i> ST01
+                <i class="fa fa-circle text-danger"></i> ST03
+                <i class="fa fa-circle text-warning"></i> ST07
               </div>
               <hr>
               <div class="stats">
-                <i class="fa fa-clock-o"></i> Campaign sent 2 days ago
+                <i class="fa fa-history"></i> Updated yesterday
               </div>
             </template>
           </chart-card>
+        </div>
+        <div class="col-md-8">
+          <map-card :chart-data="lineChart.data"
+                      :chart-options="lineChart.options"
+                      :responsive-options="lineChart.responsiveOptions">
+            <template slot="header">
+              <h4 class="card-title">Map Example</h4>
+              <p class="card-category">Real Time Weather Stations</p>
+            </template>
+            <template slot="footer">
+             <div class="stats">
+                <i class="fa fa-history"></i> Updated 3 minutes ago
+              </div>
+            </template>
+          </map-card>
         </div>
       </div>
 
@@ -115,55 +146,20 @@
             :chart-responsive-options="barChart.responsiveOptions"
             chart-type="Bar">
             <template slot="header">
-              <h4 class="card-title">2014 Sales</h4>
-              <p class="card-category">All products including Taxes</p>
+              <h4 class="card-title">2018 Max/Min Humidity</h4>
+              <p class="card-category">Measured in ST03</p>
             </template>
             <template slot="footer">
               <div class="legend">
-                <i class="fa fa-circle text-info"></i> Tesla Model S
-                <i class="fa fa-circle text-danger"></i> BMW 5 Series
+                <i class="fa fa-circle text-info"></i> Min
+                <i class="fa fa-circle text-danger"></i> Max
               </div>
               <hr>
               <div class="stats">
-                <i class="fa fa-check"></i> Data information certified
+                <i class="fa fa-check"></i> Updated last month
               </div>
             </template>
           </chart-card>
-        </div>
-
-        <div class="col-md-6">
-          <card>
-            <template slot="header">
-              <h5 class="title">Tasks</h5>
-              <p class="category">Backend development</p>
-            </template>
-            <l-table :data="tableData.data"
-                     :columns="tableData.columns">
-              <template slot="columns"></template>
-
-              <template slot-scope="{row}">
-                <td>
-                  <Checkbox v-model="row.checked"></Checkbox>
-                </td>
-                <td>{{row.title}}</td>
-                <td class="td-actions text-right">
-                  <button type="button" class="btn-simple btn btn-xs btn-info" v-tooltip.top-center="editTooltip">
-                    <i class="fa fa-edit"></i>
-                  </button>
-                  <button type="button" class="btn-simple btn btn-xs btn-danger" v-tooltip.top-center="deleteTooltip">
-                    <i class="fa fa-times"></i>
-                  </button>
-                </td>
-              </template>
-            </l-table>
-            <div class="footer">
-              <hr>
-              <div class="stats">
-                <i class="fa fa-history"></i> Updated 3 minutes ago
-              </div>
-            </div>
-          </card>
-
         </div>
       </div>
     </div>
@@ -172,6 +168,7 @@
 <script>
   import ChartCard from 'src/components/UIComponents/Cards/ChartCard.vue'
   import StatsCard from 'src/components/UIComponents/Cards/StatsCard.vue'
+  import MapCard from 'src/components/UIComponents/Cards/MapCard.vue'
   import Card from 'src/components/UIComponents/Cards/Card.vue'
   import LTable from 'src/components/UIComponents/Table.vue'
   import Checkbox from 'src/components/UIComponents/Inputs/Checkbox.vue'
@@ -182,7 +179,8 @@
       Card,
       LTable,
       ChartCard,
-      StatsCard
+      StatsCard,
+      MapCard
     },
     data () {
       return {
@@ -190,22 +188,22 @@
         deleteTooltip: 'Remove',
         pieChart: {
           data: {
-            labels: ['40%', '20%', '40%'],
-            series: [40, 20, 40]
+            labels: ['60%', '20%', '10%'],
+            series: [60, 20, 10]
           }
         },
         lineChart: {
           data: {
-            labels: ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM'],
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             series: [
-              [287, 385, 490, 492, 554, 586, 698, 695],
-              [67, 152, 143, 240, 287, 335, 435, 437],
-              [23, 113, 67, 108, 190, 239, 307, 308]
+              [30, 33, 32, 35, 38, 34, 32],
+              [28, 30, 29, 31, 33, 28, 26],
+              [20, 22, 23, 26, 21, 20, 18]
             ]
           },
           options: {
             low: 0,
-            high: 800,
+            high: 45,
             showArea: false,
             height: '245px',
             axisX: {
@@ -231,10 +229,10 @@
         },
         barChart: {
           data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun'],
             series: [
-              [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
-              [412, 243, 280, 580, 453, 353, 300, 364, 368, 410, 636, 695]
+              [70, 65, 63, 63, 60, 60],
+              [85, 83, 80, 82, 78, 75]
             ]
           },
           options: {
