@@ -7,6 +7,9 @@ import LightBootstrap from './light-bootstrap-main'
 
 // router setup
 import routes from './routes/routes'
+
+import 'c3/c3.min.css'
+
 // plugin setup
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)

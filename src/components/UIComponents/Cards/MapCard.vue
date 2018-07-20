@@ -29,7 +29,7 @@
   import FontMarkers from './FontMarkers'
   import WeatherMarkersDef from './weather-markers.json'
   const WeatherMarkers = FontMarkers(WeatherMarkersDef);
-console.log(WeatherMarkers);
+  
   Vue.use(VueGoogleMaps, {
     load: {
       key: API_KEY
