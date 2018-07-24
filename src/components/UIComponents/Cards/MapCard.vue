@@ -11,8 +11,10 @@
     map-type-id="roadmap"
     ref="mapRef"
   >
-    <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text">
-    </gmap-marker>
+    <gmap-cluster>
+      <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text">
+      </gmap-marker>
+    </gmap-cluster>
   </gmap-map>
     </div>
     <div class="card-footer" v-if="$slots.footer">
@@ -28,6 +30,9 @@
   import GrayScale from './GrayScale.json'
   import FontMarkers from './FontMarkers'
   import WeatherMarkersDef from './weather-markers.json'
+  import gql from 'graphql-tag'
+  import GmapCluster from 'vue2-google-maps/dist/components/cluster'
+
   const WeatherMarkers = FontMarkers(WeatherMarkersDef);
   
   Vue.use(VueGoogleMaps, {
@@ -35,10 +40,34 @@
       key: API_KEY
     }
   })
+
+  Vue.component('gmap-cluster', GmapCluster);
+
   export default {
     name: 'map-card',
     components: {
       Card
+    },
+    apollo: {
+      stations: {
+        query: gql`{
+          weatherStations(portId: 1){
+            position{
+              lat
+              lon
+            }
+          }
+        }`,
+        update: (data) => {
+          return data.weatherStations.map(weatherStation => {
+            const station = {};
+            station.position = {lat: weatherStation.position.lat, lng: weatherStation.position.lon};
+            station.icon = WeatherMarkers['wi-day-rain-mix']({scale: 1, fillOpacity: 1, fillColor: 'red', strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1});
+            station.text = '24ºC';
+            return station;
+          });
+        }
+      }
     },
     props: {
       

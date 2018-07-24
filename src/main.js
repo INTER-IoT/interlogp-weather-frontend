@@ -8,11 +8,35 @@ import LightBootstrap from './light-bootstrap-main'
 // router setup
 import routes from './routes/routes'
 
+// c3 styles
 import 'c3/c3.min.css'
+
+// apollo graphql
+
+import { ApolloClient } from 'apollo-client'
+import { HttpLink } from 'apollo-link-http'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import VueApollo from 'vue-apollo'
+
+const httpLink = new HttpLink({
+  // You should use an absolute URL here
+  uri: 'http://localhost:3020/graphql'
+})
+
+const apolloClient = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+  connectToDevTools: true
+})
+
+const apolloProvider = new VueApollo({
+  defaultClient: apolloClient
+})
 
 // plugin setup
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)
+Vue.use(VueApollo)
 
 // configure router
 const router = new VueRouter({
@@ -23,6 +47,7 @@ const router = new VueRouter({
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  provide: apolloProvider.provide(),
   render: h => h(App),
   router
 })

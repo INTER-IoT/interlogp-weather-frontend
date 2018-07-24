@@ -8,7 +8,8 @@
               <i class="wi wi-thermometer text-danger"></i>
             </div>
             <div slot="content">
-              <p class="card-category">Avg Temperature</p>
+              <!--<p class="card-category">Avg Temperature</p>-->
+              <p class="card-category">{{ testValue }}</p>
               <h4 class="card-title">40º C</h4>
             </div>
             <div slot="footer">
@@ -150,6 +151,7 @@
   import StatsCard from 'src/components/UIComponents/Cards/StatsCard.vue'
   import MapCard from 'src/components/UIComponents/Cards/MapCard.vue'
   import Card from 'src/components/UIComponents/Cards/Card.vue'
+  import gql from 'graphql-tag'
 
   export default {
     components: {
@@ -157,6 +159,14 @@
       ChartCard,
       StatsCard,
       MapCard
+    },
+    apollo: {
+      testValue: {
+        query: gql`{hello}`,
+        update: (data) => {
+          return data.hello;
+        }
+      }
     },
     data () {
       return {
