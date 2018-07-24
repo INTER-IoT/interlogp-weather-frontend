@@ -51,19 +51,31 @@
     apollo: {
       stations: {
         query: gql`{
-          weatherStations(portId: 1){
-            position{
-              lat
-              lon
+          lastMeasurementsByPort(portId: 1){
+            averageTemperature
+            date
+            weatherStation{
+              id
+              position{
+                lat
+                lon
+              }
             }
           }
         }`,
         update: (data) => {
-          return data.weatherStations.map(weatherStation => {
+          return data.lastMeasurementsByPort.map(measurement => {
+            const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
+            const s = temperature > 40 ? 1 : temperature < 0 ? 0 : temperature / 40;
+            const color = {
+              r: s < 0.5 ? 510 * s : 255,
+              g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
+              b: s < 0.5 ? 255 * (1 - 2 * s) : 0
+            };
             const station = {};
-            station.position = {lat: weatherStation.position.lat, lng: weatherStation.position.lon};
-            station.icon = WeatherMarkers['wi-day-rain-mix']({scale: 1, fillOpacity: 1, fillColor: 'red', strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1});
-            station.text = '24ºC';
+            station.position = {lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon};
+            station.icon = WeatherMarkers['wi-thermometer']({scale: 1.5, fillOpacity: 1, fillColor: `rgb(${color.r},${color.g},${color.b})`, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1});
+            station.text = `${temperature}º C`;
             return station;
           });
         }
