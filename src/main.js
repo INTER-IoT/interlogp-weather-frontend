@@ -11,6 +11,9 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 // LightBootstrap plugin
 import LightBootstrap from './light-bootstrap-main';
 
+// Google Maps Plugin
+import VueGoogleMaps from './vue-google-maps-main';
+
 // router setup
 import routes from './routes/routes';
 
@@ -38,6 +41,7 @@ const apolloProvider = new VueApollo({
 Vue.use(VueRouter);
 Vue.use(LightBootstrap);
 Vue.use(VueApollo);
+Vue.use(VueGoogleMaps);
 
 // configure router
 const router = new VueRouter({

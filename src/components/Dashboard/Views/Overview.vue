@@ -66,10 +66,16 @@
       </div>
       <div class="row">
         <div class="col-md-8">
-          <map-card>
+          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options">
             <template slot="header">
               <h4 class="card-title">Map Example</h4>
               <p class="card-category">Real Time Weather Stations</p>
+            </template>
+            <template slot="markers">
+              <gmap-cluster>
+                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text">
+                </gmap-marker>
+              </gmap-cluster>
             </template>
             <template slot="footer">
              <div class="stats">
@@ -109,10 +115,16 @@
           </chart-card>
         </div>
         <div class="col-md-8">
-          <map-card>
+          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options">
             <template slot="header">
               <h4 class="card-title">Map Example</h4>
               <p class="card-category">Real Time Weather Stations</p>
+            </template>
+            <template slot="markers">
+              <gmap-cluster>
+                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text">
+                </gmap-marker>
+              </gmap-cluster>
             </template>
             <template slot="footer">
              <div class="stats">
@@ -152,6 +164,8 @@
   import MapCard from 'src/components/UIComponents/Cards/MapCard.vue';
   import Card from 'src/components/UIComponents/Cards/Card.vue';
   import gql from 'graphql-tag';
+  import FontMarkers from 'assets/font-markers';
+  import { GrayScale } from 'assets/map-styles';
 
   export default {
     components: {
@@ -164,6 +178,40 @@
       testValue: {
         query: gql`{hello}`,
         update: (data) => data.hello,
+      },
+      stations: {
+        query: gql`{
+          lastMeasurementsByPort(portId: 1){
+            averageTemperature
+            date
+            weatherStation{
+              id
+              position{
+                lat
+                lon
+              }
+            }
+          }
+        }`,
+        update: (data) => data.lastMeasurementsByPort.map(measurement => {
+          const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
+          const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
+          const s = temperature > 40 ? 1 : maybeUnderZero;
+          const color = {
+            r: s < 0.5 ? 510 * s : 255,
+            g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
+            b: s < 0.5 ? 255 * (1 - 2 * s) : 0,
+          };
+          const toHex = (c) => (`00${Math.floor(c).toString(16)}`).slice(-2).toUpperCase();
+          const colorCode = `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
+          const station = {};
+          station.position = { lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon };
+          station.icon = FontMarkers['fa-star']({
+            scale: 1.5, fillOpacity: 1, fillColor: colorCode, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1,
+          });
+          station.text = `${temperature}º C`;
+          return station;
+        }),
       },
     },
     data() {
@@ -207,6 +255,16 @@
             x: {
               type: 'category',
             },
+          },
+        },
+        mapOptions: {
+          center: {
+            lat: 39.454340,
+            lng: -0.316769,
+          },
+          zoom: 10,
+          options: {
+            styles: GrayScale,
           },
         },
       };
