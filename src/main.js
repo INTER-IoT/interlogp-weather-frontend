@@ -6,6 +6,7 @@ import VueApollo from 'vue-apollo';
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+import gql from 'graphql-tag';
 
 
 // LightBootstrap plugin
@@ -37,7 +38,6 @@ const apolloProvider = new VueApollo({
   defaultClient: apolloClient,
 });
 
-// plugin setup
 Vue.use(VueRouter);
 Vue.use(LightBootstrap);
 Vue.use(VueApollo);
