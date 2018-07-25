@@ -147,38 +147,36 @@
   </div>
 </template>
 <script>
-  import ChartCard from 'src/components/UIComponents/Cards/ChartCard.vue'
-  import StatsCard from 'src/components/UIComponents/Cards/StatsCard.vue'
-  import MapCard from 'src/components/UIComponents/Cards/MapCard.vue'
-  import Card from 'src/components/UIComponents/Cards/Card.vue'
-  import gql from 'graphql-tag'
+  import ChartCard from 'src/components/UIComponents/Cards/ChartCard.vue';
+  import StatsCard from 'src/components/UIComponents/Cards/StatsCard.vue';
+  import MapCard from 'src/components/UIComponents/Cards/MapCard.vue';
+  import Card from 'src/components/UIComponents/Cards/Card.vue';
+  import gql from 'graphql-tag';
 
   export default {
     components: {
       Card,
       ChartCard,
       StatsCard,
-      MapCard
+      MapCard,
     },
     apollo: {
       testValue: {
         query: gql`{hello}`,
-        update: (data) => {
-          return data.hello;
-        }
-      }
+        update: (data) => data.hello,
+      },
     },
-    data () {
+    data() {
       return {
         pieChart: {
           data: {
             columns: [
               ['Less than 1 hour', 60],
               ['Less than 1 day', 30],
-              ['More than 1 day', 10]
+              ['More than 1 day', 10],
             ],
-            type: 'pie'
-          }
+            type: 'pie',
+          },
         },
         lineChart: {
           data: {
@@ -186,14 +184,14 @@
             columns: [
               ['x', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
               ['ST01', 30, 33, 32, 35, 38, 34, 32],
-              ['ST02', 28, 30, 29, 31, 33, 28, 27]
-            ]
+              ['ST02', 28, 30, 29, 31, 33, 28, 27],
+            ],
           },
           axis: {
             x: {
-              type: 'category'
-            }
-          }
+              type: 'category',
+            },
+          },
         },
         barChart: {
           data: {
@@ -201,19 +199,19 @@
             columns: [
               ['x', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
               ['Min', 70, 65, 63, 63, 60, 60],
-              ['Max', 85, 83, 80, 82, 78, 75]
+              ['Max', 85, 83, 80, 82, 78, 75],
             ],
-            type: 'bar'
+            type: 'bar',
           },
           axis: {
             x: {
-              type: 'category'
-            }
-          }
-        }
-      }
-    }
-  }
+              type: 'category',
+            },
+          },
+        },
+      };
+    },
+  };
 </script>
 <style>
 

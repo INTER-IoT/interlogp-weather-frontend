@@ -3,14 +3,14 @@
     <thead>
       <tr>
         <slot name="columns">
-          <th v-for="column in columns">{{column}}</th>
+          <th v-for="(column, index) in columns" :key="index" >{{column}}</th>
         </slot>
       </tr>
     </thead>
     <tbody>
-    <tr v-for="item in data">
+    <tr v-for="(item, index) in data" :key="index">
       <slot :row="item">
-        <td v-for="column in columns" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
+        <td v-for="(column, index) in columns" :key="index" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
       </slot>
     </tr>
     </tbody>
@@ -21,17 +21,17 @@
     name: 'l-table',
     props: {
       columns: Array,
-      data: Array
+      data: Array,
     },
     methods: {
-      hasValue (item, column) {
-        return item[column.toLowerCase()] !== 'undefined'
+      hasValue(item, column) {
+        return item[column.toLowerCase()] !== 'undefined';
       },
-      itemValue (item, column) {
-        return item[column.toLowerCase()]
-      }
-    }
-  }
+      itemValue(item, column) {
+        return item[column.toLowerCase()];
+      },
+    },
+  };
 </script>
 <style>
 </style>

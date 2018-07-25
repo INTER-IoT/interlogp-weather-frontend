@@ -28,25 +28,25 @@
       icon: String,
       tag: {
         type: String,
-        default: 'li'
-      }
+        default: 'li',
+      },
     },
-    data () {
+    data() {
       return {
-        isOpen: false
-      }
+        isOpen: false,
+      };
     },
     methods: {
-      toggleDropDown () {
-        this.isOpen = !this.isOpen
-        this.$emit('change', this.isOpen)
+      toggleDropDown() {
+        this.isOpen = !this.isOpen;
+        this.$emit('change', this.isOpen);
       },
-      closeDropDown () {
-        this.isOpen = false
-        this.$emit('change', this.isOpen)
-      }
-    }
-  }
+      closeDropDown() {
+        this.isOpen = false;
+        this.$emit('change', this.isOpen);
+      },
+    },
+  };
 </script>
 <style scoped>
   .dropdown .dropdown-toggle{

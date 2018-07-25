@@ -23,30 +23,31 @@
   </div>
 </template>
 <script>
-  import Card from './Card.vue'
-  import {API_KEY} from './API_KEY'
-  import Vue from 'vue'
-  import * as VueGoogleMaps from 'vue2-google-maps'
-  import GrayScale from './GrayScale.json'
-  import FontMarkers from './FontMarkers'
-  import WeatherMarkersDef from './weather-markers.json'
-  import gql from 'graphql-tag'
-  import GmapCluster from 'vue2-google-maps/dist/components/cluster'
+
+  import Vue from 'vue';
+  import * as VueGoogleMaps from 'vue2-google-maps';
+  import gql from 'graphql-tag';
+  import GmapCluster from 'vue2-google-maps/dist/components/cluster';
+  import GrayScale from './GrayScale.json';
+  import FontMarkers from './FontMarkers';
+  import WeatherMarkersDef from './weather-markers.json';
+  import Card from './Card.vue';
+  import { API_KEY } from './API_KEY';
 
   const WeatherMarkers = FontMarkers(WeatherMarkersDef);
   
   Vue.use(VueGoogleMaps, {
     load: {
-      key: API_KEY
-    }
-  })
+      key: API_KEY,
+    },
+  });
 
   Vue.component('gmap-cluster', GmapCluster);
 
   export default {
     name: 'map-card',
     components: {
-      Card
+      Card,
     },
     apollo: {
       stations: {
@@ -63,53 +64,47 @@
             }
           }
         }`,
-        update: (data) => {
-          return data.lastMeasurementsByPort.map(measurement => {
-            const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
-            const s = temperature > 40 ? 1 : temperature < 0 ? 0 : temperature / 40;
-            const color = {
-              r: s < 0.5 ? 510 * s : 255,
-              g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
-              b: s < 0.5 ? 255 * (1 - 2 * s) : 0
-            };
-            const station = {};
-            station.position = {lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon};
-            station.icon = WeatherMarkers['wi-thermometer']({scale: 1.5, fillOpacity: 1, fillColor: `rgb(${color.r},${color.g},${color.b})`, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1});
-            station.text = `${temperature}º C`;
-            return station;
+        update: (data) => data.lastMeasurementsByPort.map(measurement => {
+          const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
+          const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
+          const s = temperature > 40 ? 1 : maybeUnderZero;
+          const color = {
+            r: s < 0.5 ? 510 * s : 255,
+            g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
+            b: s < 0.5 ? 255 * (1 - 2 * s) : 0,
+          };
+          const toHex = (c) => (`00${Math.floor(c).toString(16)}`).slice(-2).toUpperCase();
+          const colorCode = `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
+          const station = {};
+          station.position = { lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon };
+          station.icon = WeatherMarkers['wi-thermometer']({
+            scale: 1.5, fillOpacity: 1, fillColor: colorCode, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1,
           });
-        }
-      }
+          station.text = `${temperature}º C`;
+          return station;
+        }),
+      },
     },
     props: {
-      
+
     },
-    data () {
+    data() {
       return {
         center: {
-          lat: 39.454340, 
-          lng: -0.316769
+          lat: 39.454340,
+          lng: -0.316769,
         },
         options: {
-          styles: GrayScale
+          styles: GrayScale,
         },
         weatherIcons: WeatherMarkers,
-        stations: []
-      }
+        stations: [],
+      };
     },
     methods: {
-      
+
     },
-    async mounted () {
-      this.stations = [
-        {
-          position: {lat: 39.454340, lng: -0.316769},
-          icon: WeatherMarkers['wi-day-rain-mix']({scale: 1, fillOpacity: 1, fillColor: 'red', strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1}),
-          text: '24ºC'
-        }
-      ]
-    }
-  }
+  };
 </script>
 <style scoped>
   .card-body .vue-map-container {

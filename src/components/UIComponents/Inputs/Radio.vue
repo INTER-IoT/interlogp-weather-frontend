@@ -19,31 +19,31 @@
       label: [String, Number],
       disabled: [Boolean, String],
       value: [String, Boolean],
-      inline: Boolean
+      inline: Boolean,
     },
-    data () {
+    data() {
       return {
-        cbId: ''
-      }
+        cbId: '',
+      };
     },
     computed: {
       model: {
-        get () {
-          return this.value
+        get() {
+          return this.value;
         },
-        set (value) {
-          this.$emit('input', value)
-        }
+        set(value) {
+          this.$emit('input', value);
+        },
       },
-      inlineClass () {
+      inlineClass() {
         if (this.inline) {
-          return `radio-inline`
+          return 'radio-inline';
         }
-        return ''
-      }
+        return '';
+      },
     },
-    created () {
-      this.cbId = Math.random().toString(16).slice(2)
-    }
-  }
+    created() {
+      this.cbId = Math.random().toString(16).slice(2);
+    },
+  };
 </script>

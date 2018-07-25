@@ -32,60 +32,59 @@
   </div>
 </template>
 <script>
-  import SidebarLink from './SidebarLink.vue'
+  import SidebarLink from './SidebarLink.vue';
 
   export default {
     components: {
-      SidebarLink
+      SidebarLink,
     },
     props: {
       title: {
         type: String,
-        default: 'INTER-LOGP WEATHER'
+        default: 'INTER-LOGP WEATHER',
       },
       backgroundColor: {
         type: String,
         default: 'black',
         validator: (value) => {
-          let acceptedValues = ['', 'blue', 'azure', 'green', 'orange', 'red', 'purple', 'black']
-          return acceptedValues.indexOf(value) !== -1
-        }
+          const acceptedValues = ['', 'blue', 'azure', 'green', 'orange', 'red', 'purple', 'black'];
+          return acceptedValues.indexOf(value) !== -1;
+        },
       },
       backgroundImage: {
         type: String,
-        default: 'static/img/sidebar.jpg'
+        default: 'static/img/sidebar.jpg',
       },
       activeColor: {
         type: String,
         default: 'success',
         validator: (value) => {
-          let acceptedValues = ['primary', 'info', 'success', 'warning', 'danger']
-          return acceptedValues.indexOf(value) !== -1
-        }
+          const acceptedValues = ['primary', 'info', 'success', 'warning', 'danger'];
+          return acceptedValues.indexOf(value) !== -1;
+        },
       },
       sidebarLinks: {
         type: Array,
-        default: () => []
+        default: () => [],
       },
       autoClose: {
         type: Boolean,
-        default: true
-      }
+        default: true,
+      },
     },
-    provide () {
+    provide() {
       return {
-        autoClose: this.autoClose
-      }
+        autoClose: this.autoClose,
+      };
     },
     computed: {
-      sidebarStyle () {
+      sidebarStyle() {
         return {
-          backgroundImage: `url(${this.backgroundImage})`
-        }
-      }
-    }
-  }
-
+          backgroundImage: `url(${this.backgroundImage})`,
+        };
+      },
+    },
+  };
 </script>
 <style>
 

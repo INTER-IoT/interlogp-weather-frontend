@@ -16,33 +16,31 @@
     inheritAttrs: false,
     inject: {
       autoClose: {
-        default: true
-      }
+        default: true,
+      },
     },
     props: {
       link: {
         type: [String, Object],
-        default: () => {
-          return {
-            name: '',
-            path: '',
-            icon: ''
-          }
-        }
+        default: () => ({
+          name: '',
+          path: '',
+          icon: '',
+        }),
       },
       tag: {
         type: String,
-        default: 'router-link'
-      }
+        default: 'router-link',
+      },
     },
     methods: {
-      hideSidebar () {
+      hideSidebar() {
         if (this.autoClose && this.$sidebar && this.$sidebar.showSidebar === true) {
-          this.$sidebar.displaySidebar(false)
+          this.$sidebar.displaySidebar(false);
         }
-      }
-    }
-  }
+      },
+    },
+  };
 </script>
 <style>
 </style>
