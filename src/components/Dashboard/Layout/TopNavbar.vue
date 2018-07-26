@@ -1,7 +1,8 @@
 <template>
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">{{ routeName }}</a>
+      <!--<a class="navbar-brand" href="#">{{ routeName }}</a>-->
+      <span class="navbar-brand">{{ routeName }}</span>
       <button type="button"
               class="navbar-toggler navbar-toggler-right"
               :class="{toggled: $sidebar.showSidebar}"
@@ -15,6 +16,10 @@
       </button>
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="nav navbar-nav mr-auto">
+          <drop-down title="Views">
+            <a class="dropdown-item" v-for="viewLink in viewLinks" :key="viewLink.link" :href="viewLink.link">{{ viewLink.name }}</a>
+            <!--<div class="divider"></div>-->
+          </drop-down>
           <drop-down tag="li">
             <template slot="title">
               <i class="nc-icon nc-planet"></i>
@@ -50,6 +55,15 @@
       routeName() {
         const { name } = this.$route;
         return this.capitalizeFirstLetter(name);
+      },
+      viewLinks() {
+        const { id } = this.$route.params;
+        return this.$router.options.routes
+          .find(route => route.path === '/ports/:id')
+          .children.map(viewRoute => ({
+            name: viewRoute.name,
+            link: `#/ports/${id}/${viewRoute.path}`,
+          }));
       },
     },
     data() {

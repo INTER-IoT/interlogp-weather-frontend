@@ -2,78 +2,15 @@
   <div class="content">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xl-3 col-md-6">
-          <stats-card>
-            <div slot="header" class="icon-warning">
-              <i class="wi wi-thermometer text-danger"></i>
-            </div>
-            <div slot="content">
-              <!--<p class="card-category">Avg Temperature</p>-->
-              <p class="card-category">{{ testValue }}</p>
-              <h4 class="card-title">40º C</h4>
-            </div>
-            <div slot="footer">
-              <i class="fa fa-refresh"></i>Updated now
-            </div>
-          </stats-card>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-          <stats-card>
-            <div slot="header" class="icon-success">
-              <i class="wi wi-strong-wind text-success"></i>
-            </div>
-            <div slot="content">
-              <p class="card-category">Avg Wind Speed</p>
-              <h4 class="card-title">4.3 m/s</h4>
-            </div>
-            <div slot="footer">
-              <i class="fa fa-calendar-o"></i>Last day
-            </div>
-          </stats-card>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-          <stats-card>
-            <div slot="header" class="icon-danger">
-              <i class="wi wi-humidity text-primary"></i>
-            </div>
-            <div slot="content">
-              <p class="card-category">Avg Humidity</p>
-              <h4 class="card-title">70 %</h4>
-            </div>
-            <div slot="footer">
-              <i class="fa fa-clock-o"></i>Last day
-            </div>
-          </stats-card>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-          <stats-card>
-            <div slot="header" class="icon-info">
-              <i class="wi wi-thermometer-exterior text-primary"></i>
-            </div>
-            <div slot="content">
-              <p class="card-category">Avg Sea Temperature</p>
-              <h4 class="card-title">28º C</h4>
-            </div>
-            <div slot="footer">
-              <i class="fa fa-refresh"></i>Updated now
-            </div>
-          </stats-card>
-        </div>
-
-      </div>
-      <div class="row">
         <div class="col-md-8">
-          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options">
+          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options" height="75vh">
             <template slot="header">
-              <h4 class="card-title">Map Example</h4>
+              <h4 class="card-title">Wind Speed</h4>
               <p class="card-category">Real Time Weather Stations</p>
             </template>
             <template slot="markers">
               <gmap-cluster>
-                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text">
+                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text" @click="markerClicked(s)">
                 </gmap-marker>
               </gmap-cluster>
             </template>
@@ -166,7 +103,7 @@
   import gql from 'graphql-tag';
   import FontMarker from 'assets/font-markers';
   import { GrayScale } from 'assets/map-styles';
-
+  
   export default {
     components: {
       Card,
@@ -183,9 +120,10 @@
         update: (data) => data.hello,
       },
       stations: {
-        query: gql`query LastMeasurementByPort($port: Int!){
+        query: gql`query LastMeasurementsByPort($port: Int!){
           lastMeasurementsByPort(portId: $port){
-            averageTemperature
+            windSpeed
+            windDirection
             date
             weatherStation{
               id
@@ -196,30 +134,32 @@
             }
           }
         }`,
+        update: (data) => data.lastMeasurementsByPort.map(measurement => {
+          const windSpeed = Math.round(measurement.windSpeed * 100) / 100;
+          const windDirection = Math.round(measurement.windDirection);
+          let color;
+          if (windSpeed < 10) color = 'blue';
+          else if (windSpeed < 20) color = 'orange';
+          else color = 'red';
+          const station = {};
+          station.position = { lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon };
+          station.icon = new FontMarker('fa-arrow-alt-circle-up', {
+            scale: 2, fillOpacity: 1, fillColor: color, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1, rotation: windDirection,
+          });
+          station.weatherStationId = measurement.weatherStation.id;
+          station.text = `${windSpeed} m/s`;
+          return station;
+        }),
         variables() {
           return {
             port: this.port.id,
           };
         },
-        update: (data) => data.lastMeasurementsByPort.map(measurement => {
-          const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
-          const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
-          const s = temperature > 40 ? 1 : maybeUnderZero;
-          const color = {
-            r: s < 0.5 ? 510 * s : 255,
-            g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
-            b: s < 0.5 ? 255 * (1 - 2 * s) : 0,
-          };
-          const toHex = (c) => (`00${Math.floor(c).toString(16)}`).slice(-2).toUpperCase();
-          const colorCode = `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
-          const station = {};
-          station.position = { lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon };
-          station.icon = new FontMarker('fa-star', {
-            scale: 1.5, fillOpacity: 1, fillColor: colorCode, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1,
-          });
-          station.text = `${temperature}º C`;
-          return station;
-        }),
+      },
+    },
+    methods: {
+      markerClicked: (marker) => {
+        console.log(marker);
       },
     },
     data() {
@@ -273,6 +213,7 @@
           zoom: 15,
           options: {
             styles: GrayScale,
+            streetViewControl: false,
           },
         },
       };

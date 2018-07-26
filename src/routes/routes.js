@@ -4,6 +4,7 @@ import NotFound from 'src/components/GeneralViews/NotFoundPage.vue';
 
 // Admin pages
 import Overview from 'src/components/Dashboard/Views/Overview.vue';
+import Windspeed from 'src/components/Dashboard/Views/Windspeed.vue';
 
 const routes = [
   {
@@ -20,6 +21,11 @@ const routes = [
         path: 'overview',
         name: 'Overview',
         component: Overview,
+      },
+      {
+        path: 'windspeed',
+        name: 'Windspeed',
+        component: Windspeed,
       },
     ],
   },

@@ -1,16 +1,9 @@
-import FontMarkers from './FontMarkers';
+import { FontMarker, GlyphLoader } from './FontMarker';
 
 import WeatherMarkersDef from './weather-markers';
 import FAMarkersDef from './fa-all';
 
-const WeatherMarkers = FontMarkers(WeatherMarkersDef);
-const FAMarkers = FontMarkers(FAMarkersDef);
+GlyphLoader(WeatherMarkersDef);
+GlyphLoader(FAMarkersDef);
 
-const all = Object.assign(WeatherMarkers, FAMarkers);
-
-export {
-  WeatherMarkers,
-  FAMarkers,
-};
-
-export default all;
+export default FontMarker;

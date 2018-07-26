@@ -4,7 +4,7 @@
       <slot name="header"></slot>
     </div>
     <div class="card-body">
-      <gmap-map :center="center" :zoom="zoom" :options="options" :map-type-id="mapType" ref="mapRef">
+      <gmap-map :center="center" :zoom="zoom" :options="options" :map-type-id="mapType" ref="mapRef" :style="{ height: height }">
         <slot name="markers"></slot>
       </gmap-map>
     </div>
@@ -38,11 +38,10 @@
         type: Object,
         default: () => {},
       },
+      height: {
+        type: String,
+        default: () => 'calc(50vh - 140px)',
+      },
     },
   };
 </script>
-<style scoped>
-  .card-body .vue-map-container {
-    min-height: calc(50vh - 123px);
-  }
-</style>

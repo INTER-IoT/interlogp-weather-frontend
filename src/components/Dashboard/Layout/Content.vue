@@ -1,10 +1,14 @@
 <template>
   <transition name="fade" mode="out-in">
-    <router-view :key="$route.fullPath"></router-view>
+    <router-view :key="$route.fullPath" :port="port"></router-view>
   </transition>
 </template>
 <script>
-  export default {};
+  export default {
+    props: {
+      port: Object,
+    },
+  };
 </script>
 <style>
   .fade-enter-active,
