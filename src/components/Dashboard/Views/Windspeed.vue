@@ -71,7 +71,7 @@
   const timeTemplate = tinytime('{DD}/{Mo}/{YYYY} {H}:{mm}:{ss}', { padMonth: true });
   const timeOffset = (date) => {
     const offset = date.getTimezoneOffset();
-    return `${offset<0?'+':'-'}${`00${parseInt(Math.abs(offset/60), 10)}`.slice(-2)}${`00${parseInt(Math.abs(offset%60), 10)}`.slice(-2)}`;
+    return `${offset < 0 ? '+' : '-'}${`00${parseInt(Math.abs(offset / 60), 10)}`.slice(-2)}${`00${parseInt(Math.abs(offset % 60), 10)}`.slice(-2)}`;
   };
   
   export default {
@@ -144,16 +144,13 @@
             dateString: `${timeTemplate.render(date)}${timeOffset(date)}`,
             windSpeed: `${Math.round(100 * measurement.windSpeed) / 100} ms`,
             windDirection: `${Math.round(measurement.windDirection)}º`,
-          }
-        })
-        .sort((a, b) => b.date - a.date)
-        .map(measurement => {
-          return {
+          };
+        }).sort((a, b) => b.date - a.date)
+          .map(measurement => ({
             date: measurement.dateString,
             speed: measurement.windSpeed,
             direction: measurement.windDirection,
-          }
-        }),
+          })),
         variables() {
           return {
             station: this.mapClickedStation.weatherStationId,
@@ -162,11 +159,6 @@
         skip() {
           return this.mapClickedStation === null;
         },
-      },
-    },
-    methods: {
-      markerClicked: (marker) => {
-        console.log(marker);
       },
     },
     data() {
@@ -198,7 +190,7 @@
           },
         },
         mapClickedStation: null,
-        measurementTableColumns: ['Date', 'Direction', 'Speed']
+        measurementTableColumns: ['Date', 'Direction', 'Speed'],
       };
     },
   };

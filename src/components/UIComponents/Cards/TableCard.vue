@@ -15,8 +15,8 @@
   </div>
 </template>
 <script>
-  import Card from './Card.vue';
   import LTable from 'src/components/UIComponents/Table.vue';
+  import Card from './Card.vue';
 
   export default {
     name: 'table-card',
@@ -34,7 +34,7 @@
         type: String,
         default: () => 'calc(50vh - 140px)',
       },
-    }
+    },
   };
 </script>
 <style>

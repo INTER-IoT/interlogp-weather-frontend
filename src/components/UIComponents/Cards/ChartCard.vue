@@ -59,8 +59,8 @@
         this.handler.$emit('dispatch', (chart) => {
           chart.load(this.chartOptions.data);
         });
-      }
-    }
+      },
+    },
   };
 </script>
 <style>

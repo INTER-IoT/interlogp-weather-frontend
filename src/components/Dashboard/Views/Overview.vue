@@ -171,9 +171,8 @@
           };
         },
         update: (data) => {
-          const newest = data.lastMeasurementsByPort.map(measurement => new Date(measurement.date)).sort((a,b) => b - a)[0];
+          const newest = data.lastMeasurementsByPort.map(measurement => new Date(measurement.date)).sort((a, b) => b - a)[0];
           return data.lastMeasurementsByPort.map(measurement => {
-
             /*
             const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
             const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
