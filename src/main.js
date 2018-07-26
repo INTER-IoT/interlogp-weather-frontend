@@ -24,7 +24,7 @@ import App from './App.vue';
 
 const httpLink = new HttpLink({
   // You should use an absolute URL here
-  uri: 'http://localhost:3020/graphql',
+  uri: 'http://enolgor.dcom.upv.es:3020/graphql',
 });
 
 const apolloClient = new ApolloClient({
