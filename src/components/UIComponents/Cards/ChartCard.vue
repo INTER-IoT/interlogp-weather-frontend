@@ -34,7 +34,7 @@
   };
 
   export default {
-    name: 'chart-card2',
+    name: 'chart-card',
     components: {
       Card,
       VueC3,
@@ -52,7 +52,15 @@
     },
     async mounted() {
       this.handler.$emit('init', this.chartOptions);
+      this.$watch('chartOptions.data', this.update, { deep: true });
     },
+    methods: {
+      update() {
+        this.handler.$emit('dispatch', (chart) => {
+          chart.load(this.chartOptions.data);
+        });
+      }
+    }
   };
 </script>
 <style>

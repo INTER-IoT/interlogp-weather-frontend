@@ -9,7 +9,7 @@
             </div>
             <div slot="content">
               <!--<p class="card-category">Avg Temperature</p>-->
-              <p class="card-category">{{ testValue }}</p>
+              <p class="card-category">Avg Temperature</p>
               <h4 class="card-title">40º C</h4>
             </div>
             <div slot="footer">
@@ -66,7 +66,7 @@
       </div>
       <div class="row">
         <div class="col-md-8">
-          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options">
+          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options" height="50vh">
             <template slot="header">
               <h4 class="card-title">Map Example</h4>
               <p class="card-category">Real Time Weather Stations</p>
@@ -85,7 +85,7 @@
           </map-card>
         </div>
         <div class="col-md-4">
-          <chart-card :chart-options="pieChart">
+          <chart-card :chart-options="pieChart" ref="pie">
             <template slot="header">
               <h4 class="card-title">Weather station status</h4>
               <p class="card-category">Real time performance</p>
@@ -100,7 +100,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
           <chart-card :chart-options="lineChart">
             <template slot="header">
               <h4 class="card-title">Week Temperature Progression</h4>
@@ -114,28 +114,6 @@
             </template>
           </chart-card>
         </div>
-        <div class="col-md-8">
-          <map-card :center="mapOptions.center" :zoom="mapOptions.zoom" :options="mapOptions.options">
-            <template slot="header">
-              <h4 class="card-title">Map Example</h4>
-              <p class="card-category">Real Time Weather Stations</p>
-            </template>
-            <template slot="markers">
-              <gmap-cluster>
-                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.text">
-                </gmap-marker>
-              </gmap-cluster>
-            </template>
-            <template slot="footer">
-             <div class="stats">
-                <i class="fa fa-history"></i> Updated 3 minutes ago
-              </div>
-            </template>
-          </map-card>
-        </div>
-      </div>
-
-      <div class="row">
         <div class="col-md-6">
           <chart-card :chart-options="barChart"> <!--BAR-->
             <template slot="header">
@@ -143,10 +121,6 @@
               <p class="card-category">Measured in ST03</p>
             </template>
             <template slot="footer">
-              <div class="legend">
-                <i class="fa fa-circle text-info"></i> Min
-                <i class="fa fa-circle text-danger"></i> Max
-              </div>
               <hr>
               <div class="stats">
                 <i class="fa fa-check"></i> Updated last month
@@ -178,14 +152,9 @@
       port: Object,
     },
     apollo: {
-      testValue: {
-        query: gql`{hello}`,
-        update: (data) => data.hello,
-      },
       stations: {
         query: gql`query LastMeasurementByPort($port: Int!){
           lastMeasurementsByPort(portId: $port){
-            averageTemperature
             date
             weatherStation{
               id
@@ -201,25 +170,55 @@
             port: this.port.id,
           };
         },
-        update: (data) => data.lastMeasurementsByPort.map(measurement => {
-          const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
-          const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
-          const s = temperature > 40 ? 1 : maybeUnderZero;
-          const color = {
-            r: s < 0.5 ? 510 * s : 255,
-            g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
-            b: s < 0.5 ? 255 * (1 - 2 * s) : 0,
-          };
-          const toHex = (c) => (`00${Math.floor(c).toString(16)}`).slice(-2).toUpperCase();
-          const colorCode = `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
-          const station = {};
-          station.position = { lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon };
-          station.icon = new FontMarker('fa-star', {
-            scale: 1.5, fillOpacity: 1, fillColor: colorCode, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1,
+        update: (data) => {
+          const newest = data.lastMeasurementsByPort.map(measurement => new Date(measurement.date)).sort((a,b) => b - a)[0];
+          return data.lastMeasurementsByPort.map(measurement => {
+
+            /*
+            const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
+            const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
+            const s = temperature > 40 ? 1 : maybeUnderZero;
+            const color = {
+              r: s < 0.5 ? 510 * s : 255,
+              g: s < 0.5 ? 127 * (1 + 2 * s) : 510 * (1 - s),
+              b: s < 0.5 ? 255 * (1 - 2 * s) : 0,
+            };
+            const toHex = (c) => (`00${Math.floor(c).toString(16)}`).slice(-2).toUpperCase();
+            const colorCode = `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
+            */
+            const diff = new Date(null);
+            const diffSeconds = (newest - new Date(measurement.date)) / 1000;
+            let color;
+            if (diffSeconds <= 600) color = 'green';
+            else if (diffSeconds <= 7200) color = 'blue';
+            else color = 'red';
+            diff.setSeconds(diffSeconds);
+            const station = {};
+            station.position = { lat: measurement.weatherStation.position.lat, lng: measurement.weatherStation.position.lon };
+            station.icon = new FontMarker('wi-barometer', {
+              scale: 1.5, fillOpacity: 1, fillColor: color, strokeColor: 'black', strokeOpacity: 0, strokeWeight: 1,
+            });
+            station.text = `${diff.toISOString().substr(11, 8)}`;
+            station.diffSeconds = diffSeconds;
+            return station;
           });
-          station.text = `${temperature}º C`;
-          return station;
-        }),
+        },
+      },
+    },
+    watch: {
+      stations(stations) {
+        this.pieChart.data = Object.assign(this.pieChart.data, {
+          columns: [
+            ['Less than 10 minutes', stations.map(station => station.diffSeconds).reduce((v, s) => v + (s <= 600 ? 1 : 0), 0)],
+            ['Less than 2h', stations.map(station => station.diffSeconds).reduce((v, s) => v + ((s > 600 && s <= 7200) ? 1 : 0), 0)],
+            ['More than 2h', stations.map(station => station.diffSeconds).reduce((v, s) => v + (s > 7200 ? 1 : 0), 0)],
+          ],
+          colors: {
+            'Less than 10 minutes': 'green',
+            'Less than 2h': 'blue',
+            'More than 2h': 'red',
+          },
+        });
       },
     },
     data() {
@@ -227,9 +226,9 @@
         pieChart: {
           data: {
             columns: [
-              ['Less than 1 hour', 60],
-              ['Less than 1 day', 30],
-              ['More than 1 day', 10],
+              ['Less than 10 minutes', 60],
+              ['Less than 2h', 30],
+              ['More than 2h', 10],
             ],
             type: 'pie',
           },
@@ -273,6 +272,7 @@
           zoom: 15,
           options: {
             styles: GrayScale,
+            streetViewControl: false,
           },
         },
       };
