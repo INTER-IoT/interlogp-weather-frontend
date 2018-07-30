@@ -22,9 +22,11 @@ import 'c3/c3.min.css';
 
 import App from './App.vue';
 
+import conf from './config';
+
 const httpLink = new HttpLink({
   // You should use an absolute URL here
-  uri: 'http://enolgor.dcom.upv.es:3020/graphql',
+  uri: conf.graphqlUrl(),
 });
 
 const apolloClient = new ApolloClient({
