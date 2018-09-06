@@ -171,7 +171,8 @@
           };
         },
         update: (data) => {
-          const newest = data.lastMeasurementsByPort.map(measurement => new Date(measurement.date)).sort((a, b) => b - a)[0];
+          const newest = data.lastMeasurementsByPort.map(measurement => new Date(parseInt(measurement.date, 10))).sort((a, b) => b - a)[0];
+          console.log(newest);
           return data.lastMeasurementsByPort.map(measurement => {
             /*
             const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
@@ -186,7 +187,7 @@
             const colorCode = `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
             */
             const diff = new Date(null);
-            const diffSeconds = (newest - new Date(measurement.date)) / 1000;
+            const diffSeconds = (newest - new Date(parseInt(measurement.date, 10))) / 1000;
             let color;
             if (diffSeconds <= 600) color = 'green';
             else if (diffSeconds <= 7200) color = 'blue';
