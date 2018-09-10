@@ -91,8 +91,8 @@
         update: (data) => data.hello,
       },
       stations: {
-        query: gql`query LastMeasurementsByPort($port: Int!){
-          lastMeasurementsByPort(portId: $port){
+        query: gql`query lastWeatherMeasurementsByPort($port: Int!){
+          lastWeatherMeasurementsByPort(portId: $port){
             windSpeed
             windDirection
             date
@@ -105,7 +105,7 @@
             }
           }
         }`,
-        update: (data) => data.lastMeasurementsByPort.map(measurement => {
+        update: (data) => data.lastWeatherMeasurementsByPort.map(measurement => {
           const windSpeed = Math.round(measurement.windSpeed * 100) / 100;
           const windDirection = Math.round(measurement.windDirection);
           let color;

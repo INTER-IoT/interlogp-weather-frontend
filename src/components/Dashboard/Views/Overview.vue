@@ -154,7 +154,7 @@
     apollo: {
       stations: {
         query: gql`query LastMeasurementByPort($port: Int!){
-          lastMeasurementsByPort(portId: $port){
+          lastWeatherMeasurementsByPort(portId: $port){
             date
             weatherStation{
               id
@@ -171,9 +171,9 @@
           };
         },
         update: (data) => {
-          const newest = data.lastMeasurementsByPort.map(measurement => new Date(parseInt(measurement.date, 10))).sort((a, b) => b - a)[0];
+          const newest = data.lastWeatherMeasurementsByPort.map(measurement => new Date(parseInt(measurement.date, 10))).sort((a, b) => b - a)[0];
           console.log(newest);
-          return data.lastMeasurementsByPort.map(measurement => {
+          return data.lastWeatherMeasurementsByPort.map(measurement => {
             /*
             const temperature = Math.floor(measurement.averageTemperature * 10) / 10;
             const maybeUnderZero = temperature < 0 ? 0 : temperature / 40;
