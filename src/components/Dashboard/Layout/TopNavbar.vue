@@ -22,9 +22,9 @@
           </drop-down>
           <drop-down tag="li">
             <template slot="title">
-              <i class="nc-icon nc-planet"></i>
+              <i class="fa fa-exclamation-triangle" style="line-height: 1"></i>
               <b class="caret"></b>
-              <span class="notification">5</span>
+              <span class="notification">{{alerts ? alerts.length : 0}}</span>
             </template>
             <a class="dropdown-item" href="#">Notification 1</a>
             <a class="dropdown-item" href="#">Notification 2</a>
@@ -50,6 +50,8 @@
   </nav>
 </template>
 <script>
+  import gql from 'graphql-tag';
+
   export default {
     computed: {
       routeName() {
@@ -70,6 +72,39 @@
       return {
         activeNotifications: false,
       };
+    },
+    apollo: {
+      alerts: {
+        query: gql`query alerts($port: Int!){
+          alerts(portId: $port, processed: false){
+            date
+            text
+            id
+          }
+        }`,
+        variables() {
+          return {
+            port: parseInt(this.$route.params.id, 10),
+          };
+        },
+        subscribeToMore: {
+          document: gql`subscription alerts{
+            newAlert(portId: 1){
+              date
+              text
+              id
+            }
+          }`,
+          variables() {
+            return {
+              port: parseInt(this.$route.params.id, 10),
+            };
+          },
+          updateQuery: (previousResult, { subscriptionData }) => ({
+            alerts: [...previousResult.alerts, subscriptionData.newAlert],
+          }),
+        },
+      },
     },
     methods: {
       capitalizeFirstLetter(string) {
