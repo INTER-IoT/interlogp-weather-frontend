@@ -1,9 +1,13 @@
 import { FontMarker, GlyphLoader } from './FontMarker';
 
 import WeatherMarkersDef from './weather-markers';
-import FAMarkersDef from './fa-all';
+import FARegularMarkersDef from './fa-regular';
+import FASolidMarkersDef from './fa-solid';
+import FABrandsMarkersDef from './fa-brands';
 
 GlyphLoader(WeatherMarkersDef);
-GlyphLoader(FAMarkersDef);
+GlyphLoader(FARegularMarkersDef);
+GlyphLoader(FASolidMarkersDef);
+GlyphLoader(FABrandsMarkersDef);
 
 export default FontMarker;

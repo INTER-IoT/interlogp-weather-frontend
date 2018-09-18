@@ -8,7 +8,7 @@
       </tr>
     </thead>
     <tbody>
-    <tr v-for="(item, index) in data" :key="index">
+    <tr v-for="(item, index) in data" :key="index" @click="onClick(item)">
       <slot :row="item">
         <td v-for="(column, index) in columns" :key="index" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
       </slot>
@@ -22,6 +22,7 @@
     props: {
       columns: Array,
       data: Array,
+      onClick: Function,
     },
     methods: {
       hasValue(item, column) {

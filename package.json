@@ -23,6 +23,7 @@
     "es6-promise": "^4.1.1",
     "graphql": "^14.0.0",
     "graphql-tag": "^2.9.2",
+    "highlight.js": "^9.12.0",
     "subscriptions-transport-ws": "^0.9.14",
     "tinytime": "^0.2.6",
     "v-tooltip": "^2.0.0-rc.1",
@@ -30,6 +31,7 @@
     "vue-apollo": "^3.0.0-beta.21",
     "vue-c3": "^1.2.9",
     "vue-clickaway": "^2.1.0",
+    "vue-highlight.js": "^2.2.0",
     "vue-notifyjs": "^0.4.3",
     "vue-router": "^3.0.1",
     "vue2-google-maps": "^0.10.2"

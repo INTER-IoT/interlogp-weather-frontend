@@ -23,6 +23,9 @@ import routes from './routes/routes';
 // c3 styles
 import 'c3/c3.min.css';
 
+// highlight.js
+import VueHighlightJS from 'vue-highlight.js';
+
 import App from './App.vue';
 
 import conf from './config';
@@ -68,6 +71,7 @@ Vue.use(VueRouter);
 Vue.use(LightBootstrap);
 Vue.use(VueApollo);
 Vue.use(VueGoogleMaps);
+Vue.use(VueHighlightJS);
 
 // configure router
 const router = new VueRouter({
@@ -78,7 +82,7 @@ const router = new VueRouter({
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-  provide: apolloProvider.provide(),
+  apolloProvider,
   render: h => h(App),
   router,
 });

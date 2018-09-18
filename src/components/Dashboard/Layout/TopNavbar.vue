@@ -101,7 +101,7 @@
             };
           },
           updateQuery: (previousResult, { subscriptionData }) => ({
-            alerts: [...previousResult.alerts, subscriptionData.newAlert],
+            alerts: [...previousResult.alerts, subscriptionData.data.newAlert],
           }),
         },
       },
