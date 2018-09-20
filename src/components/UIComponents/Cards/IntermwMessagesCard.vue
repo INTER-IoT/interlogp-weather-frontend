@@ -3,18 +3,34 @@
     <div class="card-header" v-if="$slots.header">
       <slot name="header"></slot>
     </div>
-    <div class="card-body">
-      <div class="row" v-if="data">
-        <div class="col-md-4" :style="{ 'overflow': 'auto', height: height }">
+    <div class="card-body" >
+      <div class="row" v-if="data" :style="{ height }">
+        <div class="col-md-4" style="overflow: auto">
           <l-table class="table-hover table-stripped"
+            :clickable=true
+            :renderHtml=true
             :columns="columns"
             :data="data.intermwMessages"
             :onClick="showMessage">
           </l-table>
         </div>
-        <div class="col-md-8" :style="{ 'overflow': 'auto', height: height }">
-          <highlight-code lang="json" v-if="message">{{message}}</highlight-code>
-          <span v-else style="color: #7b7b7b">Please select message to inspect</span>
+        <div class="col-md-8 pr-4">
+          <div class="row" style="height: 30px;" v-if="message">
+            <div class="col-md-12">
+              <span style="font-weight: bold;">Date: </span>
+              <span class="mr-3">{{message.item.date}}</span>
+              <span style="font-weight: bold;">Type: </span>
+              <span class="mr-3">{{message.item.type}}</span>
+              <span style="font-weight: bold;">Station: </span>
+              <span>{{message.item.station}}</span>
+            </div>
+          </div>
+          <div class="row" :style="{ height: `calc(${height} - 30px)` }">
+            <div class="col-md-12" style="overflow: auto">
+              <highlight-code lang="json" v-if="message">{{message.content}}</highlight-code>
+              <span v-else style="color: #7b7b7b">Please select message to inspect</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -48,39 +64,43 @@
       return {
         columns: ['date', 'type', 'station'],
         message: null,
+        lastTimestamp: null,
       };
     },
     methods: {
       showMessage(item) {
+        if (item.isNew) item.date = item.raw.dateString;
         const byteArrayMessage = base64js.toByteArray(item.content);
         const message = String.fromCharCode.apply(null, byteArrayMessage);
         // apply indentation
-        this.message = JSON.stringify(JSON.parse(message), null, 4);
+        this.message = {
+          content: JSON.stringify(JSON.parse(message), null, 4),
+          item,
+        };
+      },
+      updateLastTimestamp(timestamp) {
+        this.lastTimestamp = timestamp;
+        this.data.intermwMessages
+          .filter(msg => msg.isNew && msg.raw.date <= timestamp)
+          .forEach(msg => {
+            msg.date = msg.raw.dateString;
+          });
       },
     },
     apollo: {
       data: {
-        query: gql`query EnvironmentalStations($port: Int!){
+        query: gql`query IntermwMessages($port: Int!){
           intermwMessages(portId: $port){
             date
             content
             weatherStation{
               id
-              port{
-                id
-              }
             }
             emissionStation{
               id
-              port{
-                id
-              }
             }
             soundStation{
               id
-              port{
-                id
-              }
             }
           }
         }`,
@@ -89,10 +109,13 @@
             port: this.port.id,
           };
         },
-        update: (data) => {
+        update(data) {
           const intermwMessages = data.intermwMessages.map(message => {
             const props = {
-              date: renderTime(new Date(parseInt(message.date, 10))),
+              raw: {
+                date: parseInt(message.date, 10),
+                dateString: renderTime(new Date(parseInt(message.date, 10))),
+              },
             };
 
             if (message.weatherStation) props.type = 'weather';
@@ -101,9 +124,50 @@
 
             props.station = message[`${props.type}Station`].id;
 
+            if (this.lastTimestamp !== null && props.raw.date > this.lastTimestamp) {
+              props.isNew = true;
+              props.date = `<span class="badge badge-warning">New</span><span>${props.raw.dateString}</span>`;
+              setTimeout(this.updateLastTimestamp, 20000, props.raw.date);
+            } else {
+              props.isNew = false;
+              props.date = props.raw.dateString;
+            }
+
             return Object.assign({}, message, props);
           });
+
+          intermwMessages.sort((a, b) => b.raw.date - a.raw.date);
+
+          if (this.lastTimestamp === null) {
+            this.lastTimestamp = intermwMessages[0].raw.date;
+          }
+
           return { intermwMessages };
+        },
+        subscribeToMore: {
+          document: gql`subscription IntermwMessages($port: Int!){
+            newIntermwMessage(portId: $port){
+              date
+              content
+              weatherStation{
+                id
+              }
+              emissionStation{
+                id
+              }
+              soundStation{
+                id
+              }
+            }
+          }`,
+          variables() {
+            return {
+              port: this.port.id,
+            };
+          },
+          updateQuery: (previousResult, { subscriptionData }) => ({
+            intermwMessages: [...previousResult.intermwMessages, subscriptionData.data.newIntermwMessage],
+          }),
         },
       },
     },

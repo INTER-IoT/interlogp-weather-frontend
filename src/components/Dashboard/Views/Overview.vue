@@ -10,7 +10,7 @@
             </template>
             <template slot="markers">
               <gmap-cluster>
-                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.name" @click="mapClickedStation=s">
+                <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.name" @click="mapStationClicked(s)">
                 </gmap-marker>
               </gmap-cluster>
             </template>
@@ -26,7 +26,7 @@
             <div class="card-header">
               <h4 class="card-title">Station Info</h4>
             </div>
-            <div class="card-body" v-if="mapClickedStation !== null">
+            <div class="card-body mr-3" v-if="mapClickedStation !== null">
               <div class="row mb-3 ml-1">
                 <span class="mr-2" style="font-weight: bold">ID:</span>
                 <span>{{mapClickedStation.id}}</span>
@@ -51,6 +51,11 @@
               <div class="row mb-3 ml-1">
                 <span class="mr-2" style="font-weight: bold">Alerts:</span>
                 <span><a href="javascript:void(0)">5</a></span>
+              </div>
+              <div class="row mb-3 ml-1">
+                <span class="mr-2" style="font-weight: bold">Last Measurement:</span>
+                <highlight-code lang="json" v-if="mapClickedStation.lastMeasurement">{{mapClickedStation.lastMeasurement}}</highlight-code>
+                <span style="color: #7b7b7b" v-else>No records found</span>
               </div>
             </div>
             <div class="card-body" v-else>
@@ -86,7 +91,7 @@
   import gql from 'graphql-tag';
   import FontMarker from 'assets/font-markers';
   import { GrayScale } from 'assets/map-styles';
-  import { destinationPoint } from 'src/utils/misc';
+  import { destinationPoint, renderTime } from 'src/utils/misc';
 
   export default {
     components: {
@@ -145,21 +150,21 @@
 
           const weatherStations = data.weatherStations.map(mapper(
             new FontMarker('fa-tachometer-alt', {
-              scale: 1, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
+              scale: 1.5, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
             }),
             'weather',
           ));
 
           const emissionStations = data.emissionStations.map(mapper(
             new FontMarker('fa-skull', {
-              scale: 1, fillOpacity: 1, fillColor: '#FF4136', rotation: 180,
+              scale: 1.5, fillOpacity: 1, fillColor: '#FF4136', rotation: 180,
             }),
             'emission',
           ));
 
           const soundStations = data.soundStations.map(mapper(
             new FontMarker('fa-bullhorn', {
-              scale: 1, fillOpacity: 1, fillColor: '#3D9970', rotation: 180,
+              scale: 1.5, fillOpacity: 1, fillColor: '#3D9970', rotation: 180,
             }),
             'sound',
           ));
@@ -193,67 +198,177 @@
           return stations;
         },
       },
-    },
-    watch: {
-      stations(stations) {
-        this.pieChart.data = Object.assign(this.pieChart.data, {
-          columns: [
-            ['Less than 10 minutes', stations.map(station => station.diffSeconds).reduce((v, s) => v + (s <= 600 ? 1 : 0), 0)],
-            ['Less than 2h', stations.map(station => station.diffSeconds).reduce((v, s) => v + ((s > 600 && s <= 7200) ? 1 : 0), 0)],
-            ['More than 2h', stations.map(station => station.diffSeconds).reduce((v, s) => v + (s > 7200 ? 1 : 0), 0)],
-          ],
-          colors: {
-            'Less than 10 minutes': 'green',
-            'Less than 2h': 'blue',
-            'More than 2h': 'red',
+      measurements: {
+        query: gql`
+          query LastMeasurements($port: Int!){
+            lastWeatherMeasurementsByPort(portId: $port){
+              date
+              windSpeed
+              windDirection
+              precipitation
+              solarRadiation
+              pressure
+              humidity
+              seaTemperature
+              averageTemperature
+              weatherStation{
+                id
+              }
+            }
+            lastEmissionMeasurementsByPort(portId: $port){
+              date
+              particles
+              nox
+              so2
+              no2
+              no
+              co
+              emissionStation{
+                id
+              }
+            }
+            lastSoundMeasurementsByPort(portId: $port){
+              date
+              start
+              end
+              maxLevel
+              minLevel
+              avgLevel
+              soundStation{
+                id
+              }
+            }
+          }
+        `,
+        variables() {
+          return {
+            port: this.port.id,
+          };
+        },
+        update(data) {
+          const measurements = {};
+          ['Weather', 'Emission', 'Sound'].forEach(type => {
+            measurements[type.toLowerCase()] = data[`last${type}MeasurementsByPort`].map(measurement => {
+              const copy = { measurement: Object.assign({}, measurement) };
+              copy.station = measurement[`${type.toLowerCase()}Station`].id;
+              delete copy.measurement[`${type.toLowerCase()}Station`];
+              copy.measurement.date = renderTime(new Date(parseInt(copy.measurement.date, 10)));
+              if (type === 'Sound') {
+                copy.measurement.start = renderTime(new Date(parseInt(copy.measurement.start, 10)));
+                copy.measurement.end = renderTime(new Date(parseInt(copy.measurement.end, 10)));
+              }
+              return copy;
+            });
+          });
+          return measurements;
+        },
+        subscribeToMore: [
+          {
+            document: gql`subscription NewWeatherMeasurements($port: Int!){
+              newWeatherMeasurement(portId: $port){
+                date
+                windSpeed
+                windDirection
+                precipitation
+                solarRadiation
+                pressure
+                humidity
+                seaTemperature
+                averageTemperature
+                weatherStation{
+                  id
+                }
+              }
+            }`,
+            variables() {
+              return {
+                port: this.port.id,
+              };
+            },
+            updateQuery: (previousResult, { subscriptionData }) => {
+              const idx = previousResult.lastWeatherMeasurementsByPort
+                .findIndex(measurement => measurement.weatherStation.id === subscriptionData.data.newWeatherMeasurement.weatherStation.id);
+              const copy = Object.assign({}, previousResult);
+              copy.lastWeatherMeasurementsByPort = [...previousResult.lastWeatherMeasurementsByPort];
+              if (idx >= 0) {
+                copy.lastWeatherMeasurementsByPort[idx] = subscriptionData.data.newWeatherMeasurement;
+              } else {
+                copy.lastWeatherMeasurementsByPort = [...copy.lastWeatherMeasurementsByPort, subscriptionData.data.newWeatherMeasurement];
+              }
+              return copy;
+            },
           },
-        });
+          {
+            document: gql`subscription NewSoundMeasurements($port: Int!){
+              newSoundMeasurement(portId: $port){
+                date
+                start
+                end
+                maxLevel
+                minLevel
+                avgLevel
+                soundStation{
+                  id
+                }
+              }
+            }`,
+            variables() {
+              return {
+                port: this.port.id,
+              };
+            },
+            updateQuery: (previousResult, { subscriptionData }) => {
+              const idx = previousResult.lastSoundMeasurementsByPort
+                .findIndex(measurement => measurement.soundStation.id === subscriptionData.data.newSoundMeasurement.soundStation.id);
+              const copy = Object.assign({}, previousResult);
+              copy.lastSoundMeasurementsByPort = [...previousResult.lastSoundMeasurementsByPort];
+              if (idx >= 0) {
+                copy.lastSoundMeasurementsByPort[idx] = subscriptionData.data.newSoundMeasurement;
+              } else {
+                copy.lastSoundMeasurementsByPort = [...copy.lastSoundMeasurementsByPort, subscriptionData.data.newSoundMeasurement];
+              }
+              return copy;
+            },
+          },
+          {
+            document: gql`subscription NewEmissionMeasurements($port: Int!){
+              newEmissionMeasurement(portId: $port){
+                date
+                particles
+                nox
+                so2
+                no2
+                no
+                co
+                emissionStation{
+                  id
+                }
+              }
+            }`,
+            variables() {
+              return {
+                port: this.port.id,
+              };
+            },
+            updateQuery: (previousResult, { subscriptionData }) => {
+              const idx = previousResult.lastEmissionMeasurementsByPort
+                .findIndex(measurement => measurement.emissionStation.id === subscriptionData.data.newEmissionMeasurement.emissionStation.id);
+              const copy = Object.assign({}, previousResult);
+              copy.lastEmissionMeasurementsByPort = [...previousResult.lastEmissionMeasurementsByPort];
+              if (idx >= 0) {
+                copy.lastEmissionMeasurementsByPort[idx] = subscriptionData.data.newEmissionMeasurement;
+              } else {
+                copy.lastEmissionMeasurementsByPort = [...copy.lastEmissionMeasurementsByPort, subscriptionData.data.newEmissionMeasurement];
+              }
+              return copy;
+            },
+          },
+        ],
       },
     },
     data() {
       return {
         mapClickedStation: null,
-        pieChart: {
-          data: {
-            columns: [
-              ['Less than 10 minutes', 60],
-              ['Less than 2h', 30],
-              ['More than 2h', 10],
-            ],
-            type: 'pie',
-          },
-        },
-        lineChart: {
-          data: {
-            x: 'x',
-            columns: [
-              ['x', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-              ['ST01', 30, 33, 32, 35, 38, 34, 32],
-              ['ST02', 28, 30, 29, 31, 33, 28, 27],
-            ],
-          },
-          axis: {
-            x: {
-              type: 'category',
-            },
-          },
-        },
-        barChart: {
-          data: {
-            x: 'x',
-            columns: [
-              ['x', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-              ['Min', 70, 65, 63, 63, 60, 60],
-              ['Max', 85, 83, 80, 82, 78, 75],
-            ],
-            type: 'bar',
-          },
-          axis: {
-            x: {
-              type: 'category',
-            },
-          },
-        },
         mapOptions: {
           center: {
             lat: this.port.position.lat,
@@ -266,6 +381,27 @@
           },
         },
       };
+    },
+    watch: {
+      measurements() {
+        if (this.mapClickedStation) {
+          const station = this.mapClickedStation;
+          this.mapClickedStation = null;
+          this.mapStationClicked(station);
+        }
+      },
+    },
+    methods: {
+      mapStationClicked(station) {
+        this.mapClickedStation = station;
+        let lastMeasurement = this.measurements[station.type]
+          .find(measurement => measurement.station === station.id);
+        if (lastMeasurement) {
+          lastMeasurement = Object.assign({}, lastMeasurement.measurement);
+          delete lastMeasurement.__typename; // eslint-disable-line no-underscore-dangle
+          this.mapClickedStation.lastMeasurement = JSON.stringify(lastMeasurement, null, 4);
+        }
+      },
     },
   };
 </script>
