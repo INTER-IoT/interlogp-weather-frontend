@@ -10,6 +10,8 @@ import { split } from 'apollo-link';
 import { getMainDefinition } from 'apollo-utilities';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
+// highlight.js
+import VueHighlightJS from 'vue-highlight.js';
 
 // LightBootstrap plugin
 import LightBootstrap from './light-bootstrap-main';
@@ -22,9 +24,6 @@ import routes from './routes/routes';
 
 // c3 styles
 import 'c3/c3.min.css';
-
-// highlight.js
-import VueHighlightJS from 'vue-highlight.js';
 
 import App from './App.vue';
 
