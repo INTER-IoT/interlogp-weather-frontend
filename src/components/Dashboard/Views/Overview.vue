@@ -9,7 +9,7 @@
               <p class="card-category">Real Time Environmental Stations</p>
             </template>
             <template slot="markers">
-              <gmap-cluster>
+              <gmap-cluster maxZoom=13>
                 <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.name" @click="mapStationClicked(s)">
                 </gmap-marker>
               </gmap-cluster>
@@ -50,7 +50,7 @@
               </div>
               <div class="row mb-3 ml-1">
                 <span class="mr-2" style="font-weight: bold">Alerts:</span>
-                <span><a href="javascript:void(0)">5</a></span>
+                <span><a href="javascript:void(0)">0</a></span>
               </div>
               <div class="row mb-3 ml-1">
                 <span class="mr-2" style="font-weight: bold">Last Measurement:</span>
@@ -73,7 +73,7 @@
             </template>
             <template slot="footer">
              <div class="stats">
-                <i class="fa fa-history"></i> Updated 3 minutes ago
+                <i class="fa fa-history"></i> Updated 3 seconds ago
               </div>
             </template>
           </intermw-messages-card>
@@ -150,21 +150,21 @@
 
           const weatherStations = data.weatherStations.map(mapper(
             new FontMarker('fa-tachometer-alt', {
-              scale: 1.5, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
             }),
             'weather',
           ));
 
           const emissionStations = data.emissionStations.map(mapper(
             new FontMarker('fa-skull', {
-              scale: 1.5, fillOpacity: 1, fillColor: '#FF4136', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: '#3D9970', rotation: 180,
             }),
             'emission',
           ));
 
           const soundStations = data.soundStations.map(mapper(
             new FontMarker('fa-bullhorn', {
-              scale: 1.5, fillOpacity: 1, fillColor: '#3D9970', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: '#FF851B', rotation: 180,
             }),
             'sound',
           ));

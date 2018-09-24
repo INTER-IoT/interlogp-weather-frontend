@@ -58,7 +58,25 @@ const timeOffset = (date) => {
 
 const renderTime = date => `${timeTemplate.render(date)}${timeOffset(date)}`;
 
+const tstr = (v, t) => `Updated ${v} ${t}${v === 1 ? '' : 's'} ago`;
+
+const tf = (() => {
+  const a = {};
+  ['second', 'minute', 'hour', 'day', 'week', 'Month', 'year'].forEach(t => {
+    a[t[0]] = v => tstr(v, t.toLowerCase());
+  });
+  return a;
+})();
+
+/*
+const updatedStringMs = (ms) => {
+  const seconds = ms / 1000;
+  if (seconds <= 0) return
+};
+*/
+
 export {
   destinationPoint,
   renderTime,
+  tf,
 };
