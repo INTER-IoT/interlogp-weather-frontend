@@ -191,7 +191,7 @@
             });
           });
 
-          this.$refs.stationsMapTimer.reset();
+          if (this.$refs.stationsMapTimer) this.$refs.stationsMapTimer.reset();
 
           return stations;
         },
@@ -259,7 +259,7 @@
             });
           });
 
-          this.$refs.stationsMapTimer.reset();
+          if (this.$refs.stationsMapTimer) this.$refs.stationsMapTimer.reset();
 
           return measurements;
         },

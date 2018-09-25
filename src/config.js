@@ -1,4 +1,4 @@
 export default {
-  graphqlUrl: () => 'http://vmbrk01.westeurope.cloudapp.azure.com:3020/graphql',
-  subscriptionUrl: () => 'ws://vmbrk01.westeurope.cloudapp.azure.com:3020/subscriptions',
+  graphqlUrl: () => 'http://localhost:8080/graphql',
+  subscriptionUrl: () => 'ws://localhost:8080/subscriptions',
 };

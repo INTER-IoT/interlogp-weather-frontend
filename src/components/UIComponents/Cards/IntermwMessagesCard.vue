@@ -140,11 +140,11 @@
 
           intermwMessages.sort((a, b) => b.raw.date - a.raw.date);
 
-          if (this.lastTimestamp === null) {
+          if (this.lastTimestamp === null && intermwMessages.length > 0) {
             this.lastTimestamp = intermwMessages[0].raw.date;
           }
 
-          this.$refs.intermwTimer.reset();
+          if (this.$refs.intermwTimer) this.$refs.intermwTimer.reset();
 
           return { intermwMessages };
         },
