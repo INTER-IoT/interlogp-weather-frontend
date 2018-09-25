@@ -58,15 +58,53 @@ const timeOffset = (date) => {
 
 const renderTime = date => `${timeTemplate.render(date)}${timeOffset(date)}`;
 
-const tstr = (v, t) => `Updated ${v} ${t}${v === 1 ? '' : 's'} ago`;
-
-const tf = (() => {
+const tf = ((int) => {
+  const tstr = (v, t) => `Updated ~${v} ${t}${v === 1 ? '' : 's'} ago`;
   const a = {};
   ['second', 'minute', 'hour', 'day', 'week', 'Month', 'year'].forEach(t => {
     a[t[0]] = v => tstr(v, t.toLowerCase());
   });
-  return a;
-})();
+  const diff2Str = diff => {
+    let t = diff / 1000;
+    const s = Math.round(t);
+    if (s < 60) return a.s(s);
+    t /= 60;
+    const m = Math.round(t);
+    if (m < 60) return a.m(m);
+    t /= 60;
+    const h = Math.round(t);
+    if (h < 24) return a.h(h);
+    t /= 24;
+    const d = Math.round(t);
+    if (d < 7) return a.d(d);
+    t /= 7;
+    const w = Math.round(t);
+    return a.w(w);
+  };
+  const m = new Map();
+  setInterval(() => {
+    const t = new Date().getTime();
+    m.forEach(i => i.cb(diff2Str(t - i.t)));
+  }, int);
+  return {
+    set: (sym, cb) => {
+      if (typeof sym !== 'symbol') throw new Error('Only symbols as keys');
+      m.set(sym, { cb, t: new Date().getTime() });
+    },
+    reset: (sym, t) => {
+      if (m.has(sym)) {
+        const i = m.get(sym);
+        i.t = t || new Date().getTime();
+        i.cb(diff2Str(0));
+      }
+    },
+    unset: (sym) => {
+      if (m.has(sym)) {
+        m.delete(sym);
+      }
+    },
+  };
+})(1000 * 10);
 
 /*
 const updatedStringMs = (ms) => {

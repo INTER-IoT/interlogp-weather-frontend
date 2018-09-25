@@ -34,8 +34,8 @@
         </div>
       </div>
     </div>
-    <div class="card-footer" v-if="$slots.footer">
-      <slot name="footer"></slot>
+    <div class="card-footer">
+      <update-timer ref="intermwTimer"/>
     </div>
   </div>
 </template>
@@ -43,6 +43,7 @@
   /* global base64js */
   import gql from 'graphql-tag';
   import LTable from 'src/components/UIComponents/Table.vue';
+  import UpdateTimer from 'src/components/UIComponents/UpdateTimer.vue';
   import { renderTime } from 'src/utils/misc';
   import Card from './Card.vue';
   
@@ -52,6 +53,7 @@
     components: {
       Card,
       LTable,
+      UpdateTimer,
     },
     props: {
       port: Object,
@@ -141,6 +143,8 @@
           if (this.lastTimestamp === null) {
             this.lastTimestamp = intermwMessages[0].raw.date;
           }
+
+          this.$refs.intermwTimer.reset();
 
           return { intermwMessages };
         },

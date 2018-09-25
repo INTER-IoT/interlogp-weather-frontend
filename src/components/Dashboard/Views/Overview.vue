@@ -9,15 +9,13 @@
               <p class="card-category">Real Time Environmental Stations</p>
             </template>
             <template slot="markers">
-              <gmap-cluster maxZoom=13>
+              <gmap-cluster :maxZoom=13>
                 <gmap-marker :key="index" v-for="(s, index) in stations" :position="s.position" :icon="s.icon" :label="s.name" @click="mapStationClicked(s)">
                 </gmap-marker>
               </gmap-cluster>
             </template>
             <template slot="footer">
-             <div class="stats">
-                <i class="fa fa-history"></i> Updated 3 minutes ago
-              </div>
+             <update-timer ref="stationsMapTimer" />
             </template>
           </map-card>
         </div>
@@ -71,11 +69,6 @@
               <h4 class="card-title">INTERMW Message Inspector</h4>
               <p class="card-category">Real Time INTERMW messages received</p>
             </template>
-            <template slot="footer">
-             <div class="stats">
-                <i class="fa fa-history"></i> Updated 3 seconds ago
-              </div>
-            </template>
           </intermw-messages-card>
         </div>
       </div>
@@ -88,6 +81,8 @@
   import MapCard from 'src/components/UIComponents/Cards/MapCard.vue';
   import Card from 'src/components/UIComponents/Cards/Card.vue';
   import IntermwMessagesCard from 'src/components/UIComponents/Cards/IntermwMessagesCard.vue';
+  import UpdateTimer from 'src/components/UIComponents/UpdateTimer.vue';
+
   import gql from 'graphql-tag';
   import FontMarker from 'assets/font-markers';
   import { GrayScale } from 'assets/map-styles';
@@ -100,6 +95,7 @@
       StatsCard,
       MapCard,
       IntermwMessagesCard,
+      UpdateTimer,
     },
     props: {
       port: Object,
@@ -137,7 +133,7 @@
             port: this.port.id,
           };
         },
-        update: (data) => {
+        update(data) {
           const mapper = (icon, type) => (station) => ({
             id: station.id,
             active: true, // TODO: PROVISIONAL
@@ -194,6 +190,8 @@
               [station.position.lat, station.position.lng] = destinationPoint(station.position.lat, station.position.lng, 30 * l, i * q);
             });
           });
+
+          this.$refs.stationsMapTimer.reset();
 
           return stations;
         },
@@ -260,6 +258,9 @@
               return copy;
             });
           });
+
+          this.$refs.stationsMapTimer.reset();
+
           return measurements;
         },
         subscribeToMore: [
