@@ -9,45 +9,36 @@
               <p class="card-category">Real Time Environmental Stations</p>
             </div>
             <div class="card-body" v-if="true">
-              <div class="form-row">
-                <div class="form-group col-md-2">
-                  <label>Type</label>
-                  <select class="form-control form-control-sm">
-                    <option value="" selected disabled></option>
-                    <option>weather</option>
-                  </select>
-                </div>
-                <div class="form-group col-md-1">
-                  <label>Ports</label>
-                  <input class="form-control form-control-sm" type="text" placeholder="1">
-                </div>
-                <div class="form-group col-md-2">
-                  <label>Stations</label>
-                  <input class="form-control form-control-sm" type="text" placeholder="*">
-                </div>
-                <div class="form-group col-md-3">
-                  <label>Attribute</label>
-                  <select class="form-control form-control-sm">
-                    <option value="" selected disabled></option>
-                    <option>averageTemperature</option>
-                  </select>
-                </div>
-                <div class="form-group col-md-1">
-                  <label>Comp</label>
-                  <select class="form-control form-control-sm">
-                    <option value="" selected disabled></option>
-                    <option>=</option>
-                  </select>
-                </div>
-                <div class="form-group col-md-2">
-                  <label>Value</label>
-                  <input class="form-control form-control-sm" type="number" placeholder="0" step=any >
-                </div>
-                <div class="form-group col-md-1">
-                  <label>&nbsp;</label>
-                  <input class="btn btn-primary btn-fill btn-sm" type="button" value="ADD" style="width: 100%">
-                </div>
-              </div>
+             <table class="table table-sm table-fix-sm">
+              <thead>
+                <tr>
+                  <slot name="columns">
+                    <th v-for="(column, index) in columns" :key="index" >{{column}}</th>
+                  </slot>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(item, index) in values" :key="index">
+                <slot :row="item">
+                  <td v-for="(column, index) in columns" :key="index">{{item[column]}}</td>
+                </slot>
+                <!--
+                <td></td>
+                <td><button class="btn btn-sm btn-primary btn-fill" @click="copyRule(item.raw)"><font-awesome-icon icon="copy"></font-awesome-icon></button></td>
+                <td></td>
+                <td><button class="btn btn-sm btn-primary btn-fill" @click="copyRule(item.raw)"><font-awesome-icon icon="copy"></font-awesome-icon></button></td>
+                -->
+                <td>
+                  <button class="btn btn-sm btn-primary btn-fill" @click="copyRule(item)"><font-awesome-icon icon="copy"></font-awesome-icon></button>
+                  <button class="btn btn-sm btn-danger btn-fill" @click="deleteRule(item)"><font-awesome-icon icon="trash-alt"></font-awesome-icon></button>
+                  <switches v-model="item.enabled" theme="bootstrap" color="primary" @input="switchRule(item)" :emit-on-mount=false></switches>
+                  
+                </td>
+              </tr>
+              </tbody>
+            </table>
+              <rule-form @add="ruleAdded"></rule-form>
             </div>
             <div class="card-body" v-else>
               <span style="color: #7b7b7b">Please select station in the map</span>
@@ -59,31 +50,71 @@
   </div>
 </template>
 <script>
+  import Switches from 'vue-switches';
   import Card from 'src/components/UIComponents/Cards/Card.vue';
-  import gql from 'graphql-tag';
+  import RuleForm from './Rules/RuleForm.vue';
 
   export default {
     components: {
       Card,
+      RuleForm,
+      Switches,
     },
     props: {
       port: Object,
     },
     data() {
       return {
-        definitions: {
-          types: ['', 'weather', 'emission', 'sound'],
-          attributes: {
-            weather: ['', 'averageTermperature', 'humidity'],
-            emission: ['', 'co', 'no', 'no2'],
-            sound: ['', 'minLevel', 'maxLevel'],
-          },
-          operations: ['', '<', '<=', '=', '=>', '>'],
-        },
+        columns: ['id', 'type', 'ports', 'stations', 'rule'],
+        values: [
+        ],
       };
+    },
+    methods: {
+      ruleAdded(data) {
+        const rule = data;
+        rule.ports = rule.ports[0] !== '*' ? rule.ports : [];
+        rule.stations = rule.stations[0] !== '*' ? rule.stations : [];
+        if (rule.operation.indexOf('<') >= 0) rule.comparison = -1;
+        else if (rule.operation.indexOf('>') >= 0) rule.comparison = 1;
+        else rule.comparison = 0;
+        rule.inclusive = rule.operation.indexOf('=') >= 0;
+        this.values.push({
+          id: this.values.length + 1,
+          type: rule.type,
+          ports: rule.ports.join(', '),
+          stations: rule.stations.join(', '),
+          rule: `${rule.attribute} ${rule.operation} ${rule.value}`,
+          raw: rule,
+        });
+        delete rule.operation;
+      },
+      copyRule(item) {
+        console.log('Copy');
+        console.log(item);
+      },
+      switchRule(item) {
+        console.log('Switch');
+        console.log(item);
+      },
+      deleteRule(item) {
+        console.log('Delete');
+        console.log(item);
+      },
     },
   };
 </script>
 <style>
-
+  .table-fix-sm th {
+    padding: 0.3rem !important;
+    line-height: 1.5 !important;
+  }
+  .table-fix-sm td {
+    padding: 0.3rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+  .table-fix-sm tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.05) !important;
+  }
 </style>

@@ -19,6 +19,9 @@ import LightBootstrap from './light-bootstrap-main';
 // Google Maps Plugin
 import VueGoogleMaps from './vue-google-maps-main';
 
+// Font Awesome Setup
+import VueFontAwesome from './vue-font-awesome-main';
+
 // router setup
 import routes from './routes/routes';
 
@@ -71,6 +74,7 @@ Vue.use(LightBootstrap);
 Vue.use(VueApollo);
 Vue.use(VueGoogleMaps);
 Vue.use(VueHighlightJS);
+Vue.use(VueFontAwesome);
 
 // configure router
 const router = new VueRouter({
