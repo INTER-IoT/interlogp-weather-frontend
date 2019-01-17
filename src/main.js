@@ -12,6 +12,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 
 // highlight.js
 import VueHighlightJS from 'vue-highlight.js';
+import json from 'highlight.js/lib/languages/json';
 
 // LightBootstrap plugin
 import LightBootstrap from './light-bootstrap-main';
@@ -73,7 +74,11 @@ Vue.use(VueRouter);
 Vue.use(LightBootstrap);
 Vue.use(VueApollo);
 Vue.use(VueGoogleMaps);
-Vue.use(VueHighlightJS);
+Vue.use(VueHighlightJS, {
+  languages: {
+    json,
+  },
+});
 Vue.use(VueFontAwesome);
 
 // configure router
