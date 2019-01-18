@@ -1,4 +1,4 @@
 export default {
-  graphqlUrl: () => 'http://enolgor.dcom.upv.es:3020/graphql',
-  subscriptionUrl: () => 'ws://enolgor.dcom.upv.es:3020/subscriptions',
+  graphqlUrl: () => 'http://localhost:3020/graphql',
+  subscriptionUrl: () => 'ws://localhost:3020/subscriptions',
 };

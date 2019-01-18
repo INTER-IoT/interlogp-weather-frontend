@@ -4,11 +4,11 @@
   </transition>
 </template>
 <script>
-  export default {
-    props: {
-      port: Object,
-    },
-  };
+export default {
+  props: {
+    port: Object,
+  },
+};
 </script>
 <style>
   .fade-enter-active,
