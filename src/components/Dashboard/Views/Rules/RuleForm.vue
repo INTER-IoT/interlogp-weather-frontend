@@ -51,7 +51,7 @@
             emission: ['co', 'no', 'no2'],
             sound: ['minLevel', 'maxLevel'],
           },
-          operations: ['<', '<=', '=', '=>', '>'],
+          operations: ['<', '<=', '=', '>=', '>'],
         },
         selection: {
           type: null,
@@ -92,7 +92,7 @@
       parseCSV(input) {
         if (!input) return [];
         const items = input.split(',').map(item => item.trim());
-        let valid = items.reduce((v, p) => v && p !== '' && (p === '*' || Number.isInteger(+p)), true);
+        let valid = items.reduce((v, p) => v && p !== '' && (p === '*' || (Number.isInteger(+p) && Number(+p) >= 0)), true);
         if (items.indexOf('*') >= 0 && items.length > 1) valid = false;
         if (!valid) return [];
         return items.map(i => (i === '*' ? i : +i));
@@ -103,6 +103,20 @@
         data.stations = this.parsedStations.slice();
         data.value = +data.value;
         this.$emit('add', data);
+      },
+      load(data) {
+        this.selection.type = data.type;
+        this.selection.ports = data.port.length === 0 ? '*' : data.port.join(', ');
+        this.selection.stations = data.station.length === 0 ? '*' : data.station.join(', ');
+        this.selection.attribute = data.attribute;
+        if(data.comparison === -1) {
+          this.selection.operation = data.inclusive ? '<=' : '<';
+        } else if(data.comparison === 1) {
+          this.selection.operation = data.inclusive ? '>=' : '>';
+        } else {
+          this.selection.operation = '=';
+        }
+        this.selection.value = data.value;
       },
     },
   };

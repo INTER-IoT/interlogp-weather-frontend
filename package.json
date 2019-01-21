@@ -42,7 +42,6 @@
     "vue-highlight.js": "^3.0.1",
     "vue-notifyjs": "^0.4.3",
     "vue-router": "^3.0.2",
-    "vue-switches": "^2.0.1",
     "vue2-google-maps": "^0.10.5"
   },
   "devDependencies": {
