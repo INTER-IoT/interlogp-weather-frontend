@@ -51,6 +51,7 @@
     RULES_QUERY,
     ADD_RULE_MUTATION,
     DELETE_RULE_MUTATION,
+    SET_STATE_RULE_MUTATION,
   } from './Rules.gql'
   export default {
     components: {
@@ -75,24 +76,6 @@
       },
     },
     methods: {
-      ruleAdded(data) {
-        const rule = data;
-        rule.ports = rule.ports[0] !== '*' ? rule.ports : [];
-        rule.stations = rule.stations[0] !== '*' ? rule.stations : [];
-        if (rule.operation.indexOf('<') >= 0) rule.comparison = -1;
-        else if (rule.operation.indexOf('>') >= 0) rule.comparison = 1;
-        else rule.comparison = 0;
-        rule.inclusive = rule.operation.indexOf('=') >= 0;
-        this.values.push({
-          id: this.values.length + 1,
-          type: rule.type,
-          ports: rule.ports.length === 0 ? '*' : rule.ports.join(', '),
-          stations: rule.stations.length === 0 ? '*' : rule.stations.join(', '),
-          rule: `${rule.attribute} ${rule.operation} ${rule.value}`,
-          raw: rule,
-        });
-        delete rule.operation;
-      },
       addRule(data) {
         const rule = data;
         rule.port = rule.ports[0] !== '*' ? rule.ports : [];
@@ -120,8 +103,19 @@
         this.$refs.ruleForm.load(item.raw);
       },
       switchRule(item) {
-        console.log('Switch');
-        console.log(item);
+        this.$apollo.mutate({
+          mutation: SET_STATE_RULE_MUTATION,
+          variables: {
+            ruleid: item.id,
+            state: item.enabled,
+          },
+          update: (store, {data: { setRuleState } }) => {
+            const data = store.readQuery({query: RULES_QUERY});
+            const idx = data.rules.findIndex(item => item.id === setRuleState.id);
+            data.rules[idx] = setRuleState;
+            store.writeQuery({query: RULES_QUERY, data});
+          },
+        });
       },
       deleteRule(item) {
         this.$apollo.mutate({
@@ -152,6 +146,7 @@
           ports: rule.port.length === 0 ? '*' : rule.port.join(', '),
           stations: rule.station.length === 0 ? '*' : rule.station.join(', '),
           rule: `${rule.attribute} ${operation} ${rule.value}`,
+          enabled: rule.enabled,
           raw: rule,
         };
       },
