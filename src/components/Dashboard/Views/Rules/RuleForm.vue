@@ -40,19 +40,12 @@
   </div>
 </template>
 <script>
+  import ruleDefinitions from './ruleDefinitions';
   export default {
     name: 'rule-form',
     data() {
       return {
-        definitions: {
-          types: ['weather', 'emission', 'sound'],
-          attributes: {
-            weather: ['averageTermperature', 'humidity'],
-            emission: ['co', 'no', 'no2'],
-            sound: ['minLevel', 'maxLevel'],
-          },
-          operations: ['<', '<=', '=', '>=', '>'],
-        },
+        definitions: ruleDefinitions,
         selection: {
           type: null,
           ports: null,
