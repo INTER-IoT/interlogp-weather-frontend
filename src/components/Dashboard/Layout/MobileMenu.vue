@@ -4,22 +4,13 @@
       <template slot="title">
         <i class="fa fa-globe"></i>
         <b class="caret"></b>
-        <span class="notification">5 Notifications</span>
+        <span class="notification">{{alerts ? alerts.length : 0}} Notifications</span>
       </template>
-      <a class="dropdown-item" href="#">Notification 1</a>
-      <a class="dropdown-item" href="#">Notification 2</a>
-      <a class="dropdown-item" href="#">Notification 3</a>
-      <a class="dropdown-item" href="#">Notification 4</a>
-      <a class="dropdown-item" href="#">Another notification</a>
+      <a v-if="alerts" v-for="alert in alerts.slice(0, maxNotifications)" :key="alert.id" class="dropdown-item" href="#">{{alert.title}}</a>
+      <a v-if="alerts.length > maxNotifications" class="dropdown-item" href="#">{{alerts.length - maxNotifications}} more notification{{alerts.length - maxNotifications === 1 ? '' : 's'}}</a>
     </drop-down>
     <drop-down title="Views">
-      <a class="dropdown-item" :href="viewLinks.overview" @click="$sidebar.displaySidebar(false)">Overview</a>
-      <a class="dropdown-item" :href="viewLinks.windspeed" @click="$sidebar.displaySidebar(false)">WindSpeed</a>
-      <a class="dropdown-item" href="#">Something</a>
-      <a class="dropdown-item" href="#">Another action</a>
-      <a class="dropdown-item" href="#">Something</a>
-      <div class="divider"></div>
-      <a class="dropdown-item" :href="viewLinks.rawdata" @click="$sidebar.displaySidebar(false)">Raw Data</a>
+      <a class="dropdown-item" v-for="viewLink in viewLinks" :key="viewLink.link" :href="viewLink.link">{{ viewLink.name }}</a>
     </drop-down>
     <li class="nav-item">
       <a href="#" class="nav-link">
@@ -41,17 +32,26 @@
     components: {
       DropDown,
     },
+    props: {
+      alerts: {
+        type: Array,
+        default: () => ([]),
+      }
+    },
+    data() {
+      return {
+        maxNotifications: 5,
+      };
+    },
     computed: {
       viewLinks() {
         const { id } = this.$route.params;
-        return [
-          'overview',
-          'windspeed',
-          'rawdata',
-        ].reduce((links, view) => {
-          links[view] = `#/ports/${id}/${view}`;
-          return links;
-        }, {});
+        return this.$router.options.routes
+          .find(route => route.path === '/ports/:id')
+          .children.map(viewRoute => ({
+            name: viewRoute.name,
+            link: `#/ports/${id}/${viewRoute.path}`,
+          }));
       },
     },
   };

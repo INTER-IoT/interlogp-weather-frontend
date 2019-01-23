@@ -29,6 +29,9 @@ import routes from './routes/routes';
 // c3 styles
 import 'c3/c3.min.css';
 
+// alerts plugin
+import AlertsPlugin from './alerts-plugin';
+
 import App from './App.vue';
 
 import conf from './config';
@@ -80,6 +83,9 @@ Vue.use(VueHighlightJS, {
   },
 });
 Vue.use(VueFontAwesome);
+
+// other plugins
+Vue.use(AlertsPlugin);
 
 // configure router
 const router = new VueRouter({

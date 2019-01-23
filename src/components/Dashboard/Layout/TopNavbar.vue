@@ -26,11 +26,8 @@
               <b class="caret"></b>
               <span class="notification">{{alerts ? alerts.length : 0}}</span>
             </template>
-            <a class="dropdown-item" href="#">Notification 1</a>
-            <a class="dropdown-item" href="#">Notification 2</a>
-            <a class="dropdown-item" href="#">Notification 3</a>
-            <a class="dropdown-item" href="#">Notification 4</a>
-            <a class="dropdown-item" href="#">Another notification</a>
+            <a v-if="alerts" v-for="alert in alerts.slice(0, maxNotifications)" :key="alert.id" class="dropdown-item" href="#">{{alert.title}}</a>
+            <a v-if="alerts.length > maxNotifications" class="dropdown-item" href="#">{{alerts.length - maxNotifications}} more notification{{alerts.length - maxNotifications === 1 ? '' : 's'}}</a>
           </drop-down>
         </ul>
         <ul class="navbar-nav ml-auto">
@@ -53,6 +50,12 @@
   import gql from 'graphql-tag';
 
   export default {
+    props: {
+      alerts: {
+        type: Array,
+        default: () => ([]),
+      }
+    },
     computed: {
       routeName() {
         const { name } = this.$route;
@@ -71,40 +74,8 @@
     data() {
       return {
         activeNotifications: false,
+        maxNotifications: 5,
       };
-    },
-    apollo: {
-      alerts: {
-        query: gql`query alerts($port: Int!){
-          alerts(portId: $port, processed: false){
-            date
-            text
-            id
-          }
-        }`,
-        variables() {
-          return {
-            port: parseInt(this.$route.params.id, 10),
-          };
-        },
-        subscribeToMore: {
-          document: gql`subscription alerts{
-            newAlert(portId: 1){
-              date
-              text
-              id
-            }
-          }`,
-          variables() {
-            return {
-              port: parseInt(this.$route.params.id, 10),
-            };
-          },
-          updateQuery: (previousResult, { subscriptionData }) => ({
-            alerts: [...previousResult.alerts, subscriptionData.data.newAlert],
-          }),
-        },
-      },
     },
     methods: {
       capitalizeFirstLetter(string) {
