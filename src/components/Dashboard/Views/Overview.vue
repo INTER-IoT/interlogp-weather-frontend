@@ -127,6 +127,14 @@
                 lon
               }
             }
+            noatumWeatherStations(portId: $port){
+              id
+              name
+              position{
+                lat
+                lon
+              }
+            }
         }`,
         variables() {
           return {
@@ -165,7 +173,14 @@
             'sound',
           ));
 
-          const stations = [...weatherStations, ...emissionStations, ...soundStations];
+          const noatumWeatherStations = data.noatumWeatherStations.map(mapper(
+            new FontMarker('fa-flag', {
+              scale: 1, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
+            }),
+            'noatumWeather',
+          ));
+
+          const stations = [...weatherStations, ...emissionStations, ...soundStations, ...noatumWeatherStations];
 
           const conflicting = {};
           stations.forEach(a => {
@@ -236,6 +251,13 @@
                 id
               }
             }
+            lastNoatumWeatherMeasurementsByPort(portId: $port){
+              date
+              windSpeed
+              noatumWeatherStation{
+                id
+              }
+            }
           }
         `,
         variables() {
@@ -245,11 +267,11 @@
         },
         update(data) {
           const measurements = {};
-          ['Weather', 'Emission', 'Sound'].forEach(type => {
+          ['Weather', 'Emission', 'Sound', 'NoatumWeather'].forEach(type => {
             measurements[type.toLowerCase()] = data[`last${type}MeasurementsByPort`].map(measurement => {
               const copy = { measurement: Object.assign({}, measurement) };
-              copy.station = measurement[`${type.toLowerCase()}Station`].id;
-              delete copy.measurement[`${type.toLowerCase()}Station`];
+              copy.station = measurement[`${type.charAt(0).toLowerCase()}${type.slice(1)}Station`].id;
+              delete copy.measurement[`${type.charAt(0).toLowerCase()}${type.slice(1)}Station`];
               copy.measurement.date = renderTime(new Date(parseInt(copy.measurement.date, 10)));
               if (type === 'Sound') {
                 copy.measurement.start = renderTime(new Date(parseInt(copy.measurement.start, 10)));
@@ -395,7 +417,7 @@
     methods: {
       mapStationClicked(station) {
         this.mapClickedStation = station;
-        let lastMeasurement = this.measurements[station.type]
+        let lastMeasurement = this.measurements[station.type.toLowerCase()]
           .find(measurement => measurement.station === station.id);
         if (lastMeasurement) {
           lastMeasurement = Object.assign({}, lastMeasurement.measurement);

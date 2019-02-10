@@ -104,6 +104,9 @@
             soundStation{
               id
             }
+            noatumWeatherStation{
+              id
+            }
           }
         }`,
         variables() {
@@ -123,6 +126,7 @@
             if (message.weatherStation) props.type = 'weather';
             if (message.soundStation) props.type = 'sound';
             if (message.emissionStation) props.type = 'emission';
+            if (message.noatumWeatherStation) props.type = 'noatumWeather';
 
             props.station = message[`${props.type}Station`].id;
 
@@ -160,6 +164,9 @@
                 id
               }
               soundStation{
+                id
+              }
+              noatumWeatherStation{
                 id
               }
             }
