@@ -22,7 +22,9 @@
               <span style="font-weight: bold;">Type: </span>
               <span class="mr-3">{{message.item.type}}</span>
               <span style="font-weight: bold;">Station: </span>
-              <span>{{message.item.station}}</span>
+              <span class="mr-3">{{message.item.station}}</span>
+              <span style="font-weight: bold;">Sender: </span>
+              <span>{{message.item.sentBy}}</span>
             </div>
           </div>
           <div class="row" :style="{ height: `calc(${height} - 30px)` }">
@@ -74,6 +76,7 @@
         if (item.isNew) item.date = item.raw.dateString;
         const byteArrayMessage = base64js.toByteArray(item.content);
         const message = String.fromCharCode.apply(null, byteArrayMessage);
+        if (item.sentBy.startsWith('::ffff:')) item.sentBy = item.sentBy.substr(7);
         // apply indentation
         this.message = {
           content: JSON.stringify(JSON.parse(message), null, 4),
@@ -94,6 +97,7 @@
         query: gql`query IntermwMessages($port: Int!){
           intermwMessages(portId: $port){
             date
+            sentBy
             content
             weatherStation{
               id
@@ -157,6 +161,7 @@
             newIntermwMessage(portId: $port){
               date
               content
+              sentBy
               weatherStation{
                 id
               }

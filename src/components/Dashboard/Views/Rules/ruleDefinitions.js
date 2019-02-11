@@ -1,5 +1,5 @@
 export default {
-  types: ['weather', 'emission', 'sound'],
+  types: ['weather', 'emission', 'sound', 'noatumWeather'],
   attributes: {
     weather: [
       'windSpeed',
@@ -23,6 +23,9 @@ export default {
       'maxLevel',
       'minLevel',
       'avgLevel',
+    ],
+    noatumWeather: [
+      'windSpeed',
     ],
   },
   operations: ['<', '<=', '=', '>=', '>'],

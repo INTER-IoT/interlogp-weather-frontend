@@ -175,7 +175,7 @@
 
           const noatumWeatherStations = data.noatumWeatherStations.map(mapper(
             new FontMarker('fa-flag', {
-              scale: 1, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: '#e0da2f', rotation: 180,
             }),
             'noatumWeather',
           ));
@@ -382,6 +382,34 @@
                 copy.lastEmissionMeasurementsByPort[idx] = subscriptionData.data.newEmissionMeasurement;
               } else {
                 copy.lastEmissionMeasurementsByPort = [...copy.lastEmissionMeasurementsByPort, subscriptionData.data.newEmissionMeasurement];
+              }
+              return copy;
+            },
+          },
+          {
+            document: gql`subscription NewNoatumWeatherMeasurements($port: Int!){
+              newNoatumWeatherMeasurement(portId: $port){
+                date
+                windSpeed
+                noatumWeatherStation{
+                  id
+                }
+              }
+            }`,
+            variables() {
+              return {
+                port: this.port.id,
+              };
+            },
+            updateQuery: (previousResult, { subscriptionData }) => {
+              const idx = previousResult.lastNoatumWeatherMeasurementsByPort
+                .findIndex(measurement => measurement.noatumWeatherStation.id === subscriptionData.data.newNoatumWeatherMeasurement.noatumWeatherStation.id);
+              const copy = Object.assign({}, previousResult);
+              copy.lastNoatumWeatherMeasurementsByPort = [...previousResult.lastNoatumWeatherMeasurementsByPort];
+              if (idx >= 0) {
+                copy.lastNoatumWeatherMeasurementsByPort[idx] = subscriptionData.data.newNoatumWeatherMeasurement;
+              } else {
+                copy.lastNoatumWeatherMeasurementsByPort = [...copy.lastNoatumWeatherMeasurementsByPort, subscriptionData.data.newNoatumWeatherMeasurement];
               }
               return copy;
             },
