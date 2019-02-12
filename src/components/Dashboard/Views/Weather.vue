@@ -6,15 +6,20 @@
           <div class="form-row">
             <div class="form-group">
               <label>Type</label>
-              <select class="form-control form-control-sm fix-fc" v-model="selection.type" @change="triggerMyQuery">
-                <option value="" selected disabled></option>
-                <option v-for="(item, index) in definitions.types" :key="index" :value="item">{{item}}</option>
+              <select class="form-control form-control-sm fix-fc" v-model="selection.type" @change="triggerQuery">
+                <option v-for="(item, index) in definitions.type" :key="index" :value="item">{{item}}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Period</label>
+              <select class="form-control form-control-sm fix-fc" v-model="selection.period" @change="triggerQuery">
+                <option v-for="(item, index) in definitions.period" :key="index" :value="item">{{item}}</option>
               </select>
             </div>
           </div>
         </div>
         <div class="col-md-9">
-          <stats-chart-card />
+          <stats-chart-card :period="this.selection.period" :attribute="this.selection.type" :stats="this.statistics"/>
         </div>
       </div>
     </div>
@@ -23,6 +28,13 @@
 <script>
   import StatsChartCard from 'src/components/UIComponents/Cards/StatsChartCard.vue';
   import gql from 'graphql-tag';
+
+  const formPeriodsMap = {
+    '24 hours': null,
+    'week': 'daily',
+    'month': 'daily',
+    'year': 'monthly',
+  };
 
   export default {
     components: {
@@ -34,37 +46,46 @@
     data(){
       return {
         definitions: {
-          types: ['averageTemperature', 'humidity', 'pressure', 'windSpeed'],
+          type: ['averageTemperature', 'humidity', 'pressure', 'windSpeed'],
+          period: Object.keys(formPeriodsMap),
         },
         selection: {
           type: null,
+          period: null,
         },
       };
     },
     apollo: {
       statistics: {
-        query: gql`query Statistics($port: Int!){
-            statistics(portId: $port){
+        query: gql`query Statistics($port: Int!, $period: Period!){
+            statistics(portId: $port, period: $period){
+              day
+              month
+              year
               average
+              stationId
             }
         }`,
         variables() {
           return {
             port: this.port.id,
+            period: formPeriodsMap[this.selection.period],
           };
         },
         update(data) {
           return data.statistics.map(s => {
-            const item = JSON.parse(s.average);
-            console.log(item[this.selection.type]);
-            s.selectedAvg = item[this.selection.type];
+            if(typeof s.average === 'string')
+              s.average = JSON.parse(s.average);
             return s;
           });
         },
+        skip: true,
       },
     },
     methods: {
-      triggerMyQuery () {
+      triggerQuery () {
+        const empty = Object.keys(this.selection).reduce((empty, key) => empty || this.selection[key] === null, false);
+        if(empty) return;
         this.$apollo.queries.statistics.skip = false;
         this.$apollo.queries.statistics.refetch();
       }
