@@ -3,7 +3,7 @@
     <div class="card-header" v-if="$slots.header">
       <slot name="header"></slot>
     </div>
-    <div class="card-body">
+    <div class="card-body" :style="{ height: height }">
       <vue-c3 :handler="handler"></vue-c3>
     </div>
     <div class="card-footer" v-if="$slots.footer">
@@ -43,6 +43,10 @@
       chartOptions: {
         type: Object,
         default: () => exampleOptions,
+      },
+      height: {
+        type: String,
+        default: () => '25vh',
       },
     },
     data() {

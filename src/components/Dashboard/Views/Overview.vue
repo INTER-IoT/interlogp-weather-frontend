@@ -76,8 +76,6 @@
   </div>
 </template>
 <script>
-  import ChartCard from 'src/components/UIComponents/Cards/ChartCard.vue';
-  import StatsCard from 'src/components/UIComponents/Cards/StatsCard.vue';
   import MapCard from 'src/components/UIComponents/Cards/MapCard.vue';
   import Card from 'src/components/UIComponents/Cards/Card.vue';
   import IntermwMessagesCard from 'src/components/UIComponents/Cards/IntermwMessagesCard.vue';
@@ -91,8 +89,6 @@
   export default {
     components: {
       Card,
-      ChartCard,
-      StatsCard,
       MapCard,
       IntermwMessagesCard,
       UpdateTimer,
