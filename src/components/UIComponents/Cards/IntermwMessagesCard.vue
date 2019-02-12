@@ -5,7 +5,7 @@
     </div>
     <div class="card-body" >
       <div class="row" v-if="data" :style="{ height }">
-        <div class="col-md-4" style="overflow: auto">
+        <div class="col-md-4" style="overflow: auto; height: 100%">
           <l-table class="table-hover table-stripped"
             :clickable=true
             :renderHtml=true
@@ -27,8 +27,8 @@
               <span>{{message.item.sentBy}}</span>
             </div>
           </div>
-          <div class="row" :style="{ height: `calc(${height} - 30px)` }">
-            <div class="col-md-12" style="overflow: auto">
+          <div class="row" :style="{ height: `calc(${height} - 30px)`, overflow: 'auto' }">
+            <div class="col-md-12">
               <highlight-code lang="json" v-if="message">{{message.content}}</highlight-code>
               <span v-else style="color: #7b7b7b">Please select message to inspect</span>
             </div>
