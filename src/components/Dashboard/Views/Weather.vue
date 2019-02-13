@@ -58,7 +58,7 @@
     apollo: {
       statistics: {
         query: gql`query Statistics($port: Int!, $period: Period!){
-            statistics(portId: $port, period: $period){
+            statistics(portId: $port, period: $period, statType: weather){
               day
               month
               year

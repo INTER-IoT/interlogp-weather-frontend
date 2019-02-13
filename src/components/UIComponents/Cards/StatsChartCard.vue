@@ -24,6 +24,7 @@
     for(let i = 0; i < len; i++) arr[i] = Math.random() * (max - min) + min;
     return arr;
   }
+  const datediff = (first, second) => Math.round((second-first)/(1000*60*60*24));
 
   export default {
     name: 'stats-chart-card',
@@ -61,35 +62,6 @@
           }
         };
         const today = new Date();
-        switch(this.period) {
-          case '24 hours': {
-            chart.data.columns.push(['x', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00']);
-            break;
-          }
-          case 'week': {
-            const d = today.getDay();
-            chart.data.columns.push(['x', ...days.slice(d), ...days.slice(0, d)]);
-            break;
-          }
-          case 'month': {
-            const d = today.getDate();
-            let prevMonth = today.getMonth(); // month -1 + 1, 0 index
-            if(prevMonth < 1) prevMonth = 12;
-            let prevYear = today.getFullYear();
-            if (prevMonth === 12) prevYear -= 1;
-            const prevMonthDays = monthdays(prevYear, prevMonth);
-            let first = d;
-            if(first > prevMonthDays) first = prevMonthDays;
-            const last = d - 1;
-            chart.data.columns.push(['x', ...rangeIncl(first, prevMonthDays), ...rangeIncl(1, last)]);
-            break;
-          }
-          case 'year': {
-            const m = today.getMonth();
-            chart.data.columns.push(['x', ...months.slice(m), ...months.slice(0, m)]);
-            break;
-          }
-        }
         const some2null = array => {
           for(let i = 0; i < array.length; i++) {
             if(Math.random() < 0.3) {
@@ -98,8 +70,58 @@
           }
           return array;
         };
-        chart.data.columns.push(['ST01', ...some2null(randInts(25, 30, chart.data.columns[0].length - 1))]);
-        chart.data.columns.push(['ST02', ...some2null(randInts(25, 30, chart.data.columns[0].length - 1))]);
+        switch(this.period) {
+          case '24 hours': {
+            chart.data.columns.push(['x', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00']);
+            break;
+          }
+          case 'week': {
+            const d = today.getDay();
+            chart.data.columns.push(['x', ...days.slice(d), ...days.slice(0, d)]);
+            const todayUTC00 = new Date(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`);
+            const stations = this.stats.map(s => s.stationId).filter((v, i, a) => a.indexOf(v) === i); // unique filter
+            const byIndex = rangeIncl(0, 6).map(r => this.stats.filter(s => datediff(new Date(`${s.year}-${s.month}-${s.day}`), todayUTC00) === 7 - r));
+            stations.forEach(stationId => {
+              const byIndexAndStation = byIndex.map(stats => stats.find(s => s.stationId === stationId).average[this.attribute]);
+              chart.data.columns.push([`ST ${stationId}`, ...byIndexAndStation]);
+            });
+            break;
+          }
+          case 'month': {
+            const d = today.getDate();
+            chart.data.columns.push(['x', ...rangeIncl(1, d - 1)]);
+            const todayUTC00 = new Date(`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`);
+            const stations = this.stats.map(s => s.stationId).filter((v, i, a) => a.indexOf(v) === i); // unique filter
+            const byIndex = rangeIncl(1, d - 1).map(r => this.stats.filter(s => datediff(new Date(`${s.year}-${s.month}-${s.day}`), todayUTC00) === d - r));
+            console.log(byIndex);
+            stations.forEach(stationId => {
+              const byIndexAndStation = byIndex.map(stats => stats.find(s => s.stationId === stationId).average[this.attribute]);
+              chart.data.columns.push([`ST ${stationId}`, ...byIndexAndStation]);
+            });
+            break;
+          }
+          case 'year': {
+            const m = today.getMonth();
+            const y = today.getFullYear();
+            chart.data.columns.push(['x', ...months.slice(m), ...months.slice(0, m)]);
+            const filtered = this.stats.filter(s => {
+              const ydiff = y - s.year;
+              if (ydiff > 1) return false;
+              if (ydiff === 0) return true;
+              if (s.month >= m) return true;
+              return false;
+            });
+            const stations = filtered.map(s => s.stationId).filter((v, i, a) => a.indexOf(v) === i); // unique filter
+            const byIndex = rangeIncl(1, 12).map(r => {
+              const month = m - 13 + r > 0 ? m - 13 + r : m + r - 1;
+              
+            });
+            chart.data.columns.push(['ST01', ...some2null(randInts(25, 30, chart.data.columns[0].length - 1))]);
+            chart.data.columns.push(['ST02', ...some2null(randInts(25, 30, chart.data.columns[0].length - 1))]);
+            break;
+          }
+        }
+        
         return chart;
       },
     }
