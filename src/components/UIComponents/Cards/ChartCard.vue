@@ -61,6 +61,7 @@
     methods: {
       update() {
         this.handler.$emit('dispatch', (chart) => {
+          console.log('updating....');
           chart.load(this.chartOptions.data);
         });
       },

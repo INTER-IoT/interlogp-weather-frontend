@@ -53,41 +53,81 @@
           type: null,
           period: null,
         },
+        lastMeasurements: null,
+        statistics: null,
       };
-    },
-    apollo: {
-      statistics: {
-        query: gql`query Statistics($port: Int!, $period: Period!){
-            statistics(portId: $port, period: $period, statType: weather){
-              day
-              month
-              year
-              average
-              stationId
-            }
-        }`,
-        variables() {
-          return {
-            port: this.port.id,
-            period: formPeriodsMap[this.selection.period],
-          };
-        },
-        update(data) {
-          return data.statistics.map(s => {
-            if(typeof s.average === 'string')
-              s.average = JSON.parse(s.average);
-            return s;
-          });
-        },
-        skip: true,
-      },
     },
     methods: {
       triggerQuery () {
         const empty = Object.keys(this.selection).reduce((empty, key) => empty || this.selection[key] === null, false);
         if(empty) return;
-        this.$apollo.queries.statistics.skip = false;
-        this.$apollo.queries.statistics.refetch();
+        if(this.selection.period !== '24 hours') {
+          this.$apollo.query({
+            query: gql`query Statistics($port: Int!, $period: Period!){
+              statistics(portId: $port, period: $period, statType: weather){
+                day
+                month
+                year
+                average
+                stationId
+              }
+            }`,
+            variables: {
+              port: this.port.id,
+              period: formPeriodsMap[this.selection.period],
+            },
+            update(data) {
+              return data.statistics.map(s => {
+                if(typeof s.average === 'string')
+                  s.average = JSON.parse(s.average);
+                return s;
+              });
+            },
+          }).then(result => {
+            this.statistics = result.data.statistics.map(s => {
+              if(typeof s.average === 'string')
+                  s.average = JSON.parse(s.average);
+              return s;
+            });
+          });
+        };
+        if(this.selection.period === '24 hours') {
+          this.$apollo.query({
+            query: gql`query{
+              weatherStations(portId: 1){
+                id
+              }
+            }`
+          }).then(result => {
+            const stations = result.data.weatherStations.map(station => station.id);
+            const promises = stations.map(station => this.$apollo.query({
+              query: gql`query{
+                weatherMeasurements(weatherStationId: ${station}){
+                  date
+                  ${this.selection.type}
+                  weatherStation{
+                    id
+                  }
+                }
+              }`
+            }));
+            const queryResults = [];
+            promises.reduce((prev, next) => prev.then(result => {
+              if(result) queryResults.push(result);
+              return next;
+            }), Promise.resolve()).then(result => {
+              queryResults.push(result);
+              this.statistics = queryResults.map(batch => {
+                const data = batch.data.weatherMeasurements;
+                return data.map(d => ({station: d.weatherStation.id, date: new Date(parseInt(d.date, 10)), value: d[this.selection.type]}));
+              });
+            });
+          });
+          console.log('holi');
+          return;
+        }
+        //this.$apollo.queries.statistics.skip = false;
+        //this.$apollo.queries.statistics.refetch();
       }
     },
   }
