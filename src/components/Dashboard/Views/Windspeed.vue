@@ -38,22 +38,6 @@
           </table-card>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-12">
-          <chart-card :chart-options="lineChart">
-            <template slot="header">
-              <h4 class="card-title">Week Wind Speed Progression</h4>
-              <p class="card-category">Displaying key weather stations</p>
-            </template>
-            <template slot="footer">
-              <hr>
-              <div class="stats">
-                <i class="fa fa-history"></i> Updated yesterday
-              </div>
-            </template>
-          </chart-card>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -66,13 +50,8 @@
   import tinytime from 'tinytime';
   import FontMarker from 'assets/font-markers';
   import { GrayScale } from 'assets/map-styles';
+  import { renderTime } from 'src/utils/misc';
 
-  const timeTemplate = tinytime('{DD}/{Mo}/{YYYY} {H}:{mm}:{ss}', { padMonth: true });
-  const timeOffset = (date) => {
-    const offset = date.getTimezoneOffset();
-    return `${offset < 0 ? '+' : '-'}${`00${parseInt(Math.abs(offset / 60), 10)}`.slice(-2)}${`00${parseInt(Math.abs(offset % 60), 10)}`.slice(-2)}`;
-  };
-  
   export default {
     components: {
       Card,
@@ -84,10 +63,6 @@
       port: Object,
     },
     apollo: {
-      testValue: {
-        query: gql`{hello}`,
-        update: (data) => data.hello,
-      },
       stations: {
         query: gql`query lastWeatherMeasurementsByPort($port: Int!){
           lastWeatherMeasurementsByPort(portId: $port){
@@ -136,10 +111,10 @@
           }`;
         },
         update: (data) => data.weatherMeasurements.map(measurement => {
-          const date = new Date(measurement.date);
+          const date = new Date(parseInt(measurement.date, 10));
           return {
             date,
-            dateString: `${timeTemplate.render(date)}${timeOffset(date)}`,
+            dateString: renderTime(date),
             windSpeed: `${Math.round(100 * measurement.windSpeed) / 100} ms`,
             windDirection: `${Math.round(measurement.windDirection)}º`,
           };
@@ -161,21 +136,6 @@
     },
     data() {
       return {
-        lineChart: {
-          data: {
-            x: 'x',
-            columns: [
-              ['x', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-              ['ST01', 30, 33, 32, 35, 38, 34, 32],
-              ['ST02', 28, 30, 29, 31, 33, 28, 27],
-            ],
-          },
-          axis: {
-            x: {
-              type: 'category',
-            },
-          },
-        },
         mapOptions: {
           center: {
             lat: this.port.position.lat,

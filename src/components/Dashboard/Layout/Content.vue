@@ -1,12 +1,13 @@
 <template>
   <transition name="fade" mode="out-in">
-    <router-view :key="$route.fullPath" :port="port"></router-view>
+    <router-view :key="$route.fullPath" :port="port" :alerts="alerts"></router-view>
   </transition>
 </template>
 <script>
 export default {
   props: {
     port: Object,
+    alerts: Array,
   },
 };
 </script>

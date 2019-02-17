@@ -3,18 +3,18 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-6">
-          <period-chart :port="port" period="24 hours" :attributes="this.attributes" type="weather"/>
+          <period-chart :port="port" period="24 hours" :attributes="this.attributes" type="emission"/>
         </div>
         <div class="col-md-6">
-          <period-chart :port="port" period="week" :attributes="this.attributes" type="weather"/>
+          <period-chart :port="port" period="week" :attributes="this.attributes" type="emission"/>
         </div>
       </div>
       <div class="row">
         <div class="col-md-6">
-          <period-chart :port="port" period="month" :attributes="this.attributes" type="weather"/>
+          <period-chart :port="port" period="month" :attributes="this.attributes" type="emission"/>
         </div>
         <div class="col-md-6">
-          <period-chart :port="port" period="year" :attributes="this.attributes" type="weather"/>
+          <period-chart :port="port" period="year" :attributes="this.attributes" type="emission"/>
         </div>
       </div>
     </div>
@@ -34,7 +34,7 @@
     },
     data(){
       return {
-        attributes: ['averageTemperature', 'humidity', 'pressure', 'windSpeed'],
+        attributes: ['particles', 'nox', 'so2', 'no2', 'no', 'co'],
       };
     },
   }

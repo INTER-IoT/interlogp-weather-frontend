@@ -1,27 +1,19 @@
 <template>
   <div v-if="this.stats !== null && this.period !== null && this.attribute !== null">
     <chart-card :chart-options="categoryChart" height="25vh" v-if="this.period !== '24 hours'">
-      <template slot="header">
-        <h4 class="card-title">Week Temperature Progression</h4>
-        <p class="card-category">Displaying key weather stations</p>
+      <template slot="header" v-if="$slots.header">
+        <slot name="header"></slot>
       </template>
-      <template slot="footer">
-        <hr>
-        <div class="stats">
-          <i class="fa fa-history"></i> Updated yesterday
-        </div>
+      <template slot="footer" v-if="$slots.footer">
+        <slot name="footer"></slot>
       </template>
     </chart-card>
-    <chart-card :chart-options="timeChart" height="25vh">
-      <template slot="header">
-        <h4 class="card-title">Week Temperature Progression</h4>
-        <p class="card-category">Displaying key weather stations</p>
+    <chart-card :chart-options="timeChart" height="25vh" v-else>
+      <template slot="header" v-if="$slots.header">
+        <slot name="header"></slot>
       </template>
-      <template slot="footer">
-        <hr>
-        <div class="stats">
-          <i class="fa fa-history"></i> Updated yesterday
-        </div>
+      <template slot="footer" v-if="$slots.footer">
+        <slot name="footer"></slot>
       </template>
     </chart-card>
   </div>
@@ -85,6 +77,7 @@
               type: 'timeseries',
               tick: {
                 format: '%H:%M %p',
+                culling: false,
               },
             },
           },
@@ -107,22 +100,31 @@
         this.$forceUpdate();
       },
     },
-    mounted() {
-      this.get24HourChart();
-    },
     methods: {
       get24HourChart() {
         const today = new Date();
-        this.timeChart.data.xs = {
-          'data1': 'x1',
-          'data2': 'x2',
-        };
-        this.timeChart.data.columns = [
-          ['x1', new Date('2019-02-12 02:24:02'), new Date('2019-02-13 08:24:13'), new Date('2019-02-13 12:24:13')],
-          ['x2', new Date('2019-02-13 06:55:32'), new Date('2019-02-13 09:32:41'), new Date('2019-02-13 20:22:23')],
-          ['data1', 22, 43, 19],
-          ['data2', 32, 50, 26],
-        ];
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        const stations = this.stats.filter(stStats => stStats.length > 0).map(stStats => stStats[0].station);
+        const axis = stations.reduce((agg, station) => {
+          agg[`ST ${station}`] = `x${station}`;
+          return agg;
+        }, {});
+        const filtered = this.stats.filter(stStats => stStats.length > 0).map(stStats => stStats.filter(stat => stat.date > yesterday && stat.date < today));
+        const dates = filtered.map(stStats => [`x${stStats[0].station}`, ...stStats.map(stat => stat.date)]);
+        const data = filtered.map(stStats => [`ST ${stStats[0].station}`, ...stStats.map(stat => stat.value)]);
+        this.timeChart.data.xs = axis;
+        this.timeChart.data.columns = [...dates, ...data];
+        const ticks = [];
+        const start = new Date(yesterday);
+        start.setMinutes(0);
+        start.setSeconds(0);
+        start.setMilliseconds(0);
+        for(let i = 0; i < 12; i++) {
+          start.setHours(start.getHours()+2);
+          ticks.push(new Date(start));
+        }
+        this.timeChart.axis.x.tick.values = ticks;
       },
       getWeekChart() {
         const today = new Date();

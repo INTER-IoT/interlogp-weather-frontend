@@ -48,7 +48,7 @@
               </div>
               <div class="row mb-3 ml-1">
                 <span class="mr-2" style="font-weight: bold">Alerts:</span>
-                <span><a href="javascript:void(0)">0</a></span>
+                <span><a :href="`#/ports/${port.id}/alerts`">{{mapClickedStation.alerts || 0}}</a></span>
               </div>
               <div class="row mb-3 ml-1">
                 <span class="mr-2" style="font-weight: bold">Last Measurement:</span>
@@ -86,6 +86,13 @@
   import { GrayScale } from 'assets/map-styles';
   import { destinationPoint, renderTime } from 'src/utils/misc';
 
+  const stationColors = {
+    weather: '#0074D9',
+    emission: '#3D9970',
+    sound: '#FF851B',
+    noatumWeather: '#e0da2f',
+  };
+
   export default {
     components: {
       Card,
@@ -95,6 +102,7 @@
     },
     props: {
       port: Object,
+      alerts: Array,
     },
     apollo: {
       stations: {
@@ -140,7 +148,7 @@
         update(data) {
           const mapper = (icon, type) => (station) => ({
             id: station.id,
-            active: true, // TODO: PROVISIONAL
+            active: false, // TODO: PROVISIONAL
             name: station.name,
             realposition: { lat: station.position.lat, lng: station.position.lon },
             position: { lat: station.position.lat, lng: station.position.lon },
@@ -150,28 +158,28 @@
 
           const weatherStations = data.weatherStations.map(mapper(
             new FontMarker('fa-tachometer-alt', {
-              scale: 1, fillOpacity: 1, fillColor: '#0074D9', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: stationColors.weather, rotation: 180,
             }),
             'weather',
           ));
 
           const emissionStations = data.emissionStations.map(mapper(
             new FontMarker('fa-skull', {
-              scale: 1, fillOpacity: 1, fillColor: '#3D9970', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: stationColors.emission, rotation: 180,
             }),
             'emission',
           ));
 
           const soundStations = data.soundStations.map(mapper(
             new FontMarker('fa-bullhorn', {
-              scale: 1, fillOpacity: 1, fillColor: '#FF851B', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: stationColors.sound, rotation: 180,
             }),
             'sound',
           ));
 
           const noatumWeatherStations = data.noatumWeatherStations.map(mapper(
             new FontMarker('fa-flag', {
-              scale: 1, fillOpacity: 1, fillColor: '#e0da2f', rotation: 180,
+              scale: 1, fillOpacity: 1, fillColor: stationColors.noatumWeather, rotation: 180,
             }),
             'noatumWeather',
           ));
@@ -268,7 +276,8 @@
               const copy = { measurement: Object.assign({}, measurement) };
               copy.station = measurement[`${type.charAt(0).toLowerCase()}${type.slice(1)}Station`].id;
               delete copy.measurement[`${type.charAt(0).toLowerCase()}${type.slice(1)}Station`];
-              copy.measurement.date = renderTime(new Date(parseInt(copy.measurement.date, 10)));
+              copy.measurement.dateMillis = new Date(parseInt(copy.measurement.date, 10));
+              copy.measurement.date = renderTime(copy.measurement.dateMillis);
               if (type === 'Sound') {
                 copy.measurement.start = renderTime(new Date(parseInt(copy.measurement.start, 10)));
                 copy.measurement.end = renderTime(new Date(parseInt(copy.measurement.end, 10)));
@@ -427,26 +436,42 @@
             streetViewControl: false,
           },
         },
+        lastMeasurements: {},
       };
     },
     watch: {
       measurements() {
+        ['weather', 'emission', 'sound', 'noatumWeather'].forEach(type => {
+          this.measurements[type.toLowerCase()].forEach(measurement => {
+            const station = this.stations.find(station => station.type === type && station.id === measurement.station);
+            if(station) station.lastMeasurement = measurement.measurement;
+          });
+        });
+        this.updateStationStatus();
         if (this.mapClickedStation) {
           const station = this.mapClickedStation;
           this.mapClickedStation = null;
           this.mapStationClicked(station);
         }
       },
+      alerts(){
+        if(this.stations) {
+          this.stations.forEach(station => {
+            station.alerts = this.alerts.filter(alert => alert.data.type === station.type && parseInt(alert.data.station, 10) === station.id).length;
+          });
+        }
+      },
     },
     methods: {
       mapStationClicked(station) {
         this.mapClickedStation = station;
-        let lastMeasurement = this.measurements[station.type.toLowerCase()]
-          .find(measurement => measurement.station === station.id);
-        if (lastMeasurement) {
-          lastMeasurement = Object.assign({}, lastMeasurement.measurement);
-          delete lastMeasurement.__typename; // eslint-disable-line no-underscore-dangle
-          this.mapClickedStation.lastMeasurement = JSON.stringify(lastMeasurement, null, 4);
+      },
+      updateStationStatus() {
+        if(this.stations) {
+          const now = new Date().getTime();
+          this.stations.forEach(station => {
+            station.active = station.lastMeasurement && (now - new Date(station.lastMeasurement.dateMillis).getTime()) < this.$conf.inactiveStationThresholdMillis;
+          });
         }
       },
     },

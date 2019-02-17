@@ -15,7 +15,7 @@
     <div class="main-panel">
       <top-navbar :alerts="port && alerts ? alerts[port.id] : []"></top-navbar>
 
-      <dashboard-content @click="toggleSidebar" :port="port" v-if="port !== undefined">
+      <dashboard-content @click="toggleSidebar" :port="port" v-if="port !== undefined && alerts !== undefined" :alerts="alerts[port.id]">
 
       </dashboard-content>
 
@@ -75,6 +75,10 @@
         update: (data) => {
           return data.alerts.reduce((agg, alert) => {
             if (!agg[alert.port.id]) agg[alert.port.id] = [];
+            const alertItems = alert.text.split(';').map(pair => pair.split('='));
+            alert.data = {};
+            for(let i = 0; i < alertItems.length - 1; i++) alert.data[alertItems[i][0]] = alertItems[i][1];
+            alert.data.reason = alertItems[alertItems.length - 1][0];
             agg[alert.port.id].push(alert);
             return agg;
           }, []);

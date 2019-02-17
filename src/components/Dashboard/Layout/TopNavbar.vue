@@ -26,7 +26,7 @@
               <b class="caret"></b>
               <span class="notification">{{alerts ? alerts.length : 0}}</span>
             </template>
-            <a v-if="alerts" v-for="alert in alerts.slice(0, maxNotifications)" :key="alert.id" class="dropdown-item" href="#">{{alert.title}}</a>
+            <a v-if="alerts" v-for="alert in alerts.slice(0, maxNotifications)" :key="alert.id" class="dropdown-item" :href="`#/ports/${$route.params.id}/alerts`">{{alert.title}}</a>
             <a v-if="alerts.length > maxNotifications" class="dropdown-item" href="#">{{alerts.length - maxNotifications}} more notification{{alerts.length - maxNotifications === 1 ? '' : 's'}}</a>
           </drop-down>
         </ul>

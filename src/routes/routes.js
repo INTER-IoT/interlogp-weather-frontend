@@ -5,8 +5,9 @@ import NotFound from 'src/components/GeneralViews/NotFoundPage.vue';
 // Admin pages
 import Overview from 'src/components/Dashboard/Views/Overview.vue';
 import Weather from 'src/components/Dashboard/Views/Weather.vue';
+import Emission from 'src/components/Dashboard/Views/Emission.vue';
 import Windspeed from 'src/components/Dashboard/Views/Windspeed.vue';
-import Rules from 'src/components/Dashboard/Views/Rules.vue';
+import Alerts from 'src/components/Dashboard/Views/Alerts.vue';
 
 const routes = [
   {
@@ -35,9 +36,14 @@ const routes = [
         component: Weather,
       },
       {
-        path: 'rules',
-        name: 'Rules',
-        component: Rules,
+        path: 'emission',
+        name: 'Emission',
+        component: Emission,
+      },
+      {
+        path: 'alerts',
+        name: 'Alerts',
+        component: Alerts,
       },
     ],
   },
