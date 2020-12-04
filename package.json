@@ -30,7 +30,7 @@
     "es6-promise": "^4.2.5",
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
-    "highlight.js": "^9.13.1",
+    "highlight.js": "^10.4.1",
     "subscriptions-transport-ws": "^0.9.15",
     "tinytime": "^0.2.6",
     "uninstall": "0.0.0",
